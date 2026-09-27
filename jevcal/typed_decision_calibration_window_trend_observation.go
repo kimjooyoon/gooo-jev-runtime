@@ -174,7 +174,7 @@ func typedDecisionCalibrationWindowTrendEvidenceDigest(
 	observation TypedDecisionCalibrationWindowTrendObservation,
 ) string {
 	payload := fmt.Sprintf(
-		"jev-typed-decision-calibration-window-trend|%s|%s|%s|%.9f|%.9f|%.9f|%.9f|%.9f|%.9f|%d|%d|%s|%s|%s|%s|%s|%t|%t|%t",
+		"jev-typed-decision-calibration-window-trend|%s|%s|%s|%.9f|%.9f|%.9f|%.9f|%.9f|%.9f|%d|%d|%s|%s|%s|%s|%t|%t|%t",
 		observation.Status,
 		observation.PreviousEvidenceDigest,
 		observation.CurrentEvidenceDigest,
@@ -197,4 +197,3 @@ func typedDecisionCalibrationWindowTrendEvidenceDigest(
 	digest := sha256.Sum256([]byte(payload))
 	return "sha256:" + hex.EncodeToString(digest[:])
 }
-
