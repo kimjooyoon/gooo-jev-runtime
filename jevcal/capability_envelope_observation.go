@@ -126,7 +126,7 @@ func ObserveCapabilityEnvelope(input CapabilityEnvelopeObservationInput) Capabil
 		strings.Join(canonicalCapabilities(observation.RequestedCapabilities), ","),
 		strings.Join(canonicalCapabilities(observation.ObservedCapabilities), ","),
 		observation.MissingCapability,
-		observation.ReverseObservationDigest,
+		input.ReverseObservationDigest,
 		observation.TargetStage,
 		observation.Reason,
 	)
