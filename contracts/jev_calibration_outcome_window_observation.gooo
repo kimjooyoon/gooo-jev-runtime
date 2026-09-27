@@ -1,0 +1,25 @@
+module jev_calibration_outcome_window_observation
+
+input source_version
+input contract_version
+input choice_set_digest
+input expected_choice_set_digest
+input evidence_prefix_digest
+input observation_digest
+input outcome_count
+input producer_deferred
+
+status BOUND for aligned choice-set and evidence-prefix metrics
+status DEFERRED for a deferred outcome-window producer
+status UNKNOWN for missing identity, missing evidence, mismatched choice-set, or empty outcomes
+
+field target_stage
+field record_digest
+field outcome_count
+
+constraint metric_observation_only
+constraint read_only
+constraint no_edits
+constraint no_command
+constraint no_execution
+constraint no_authorization
