@@ -108,3 +108,22 @@ func TestDiscoverCapabilitiesRejectsTamperedDeclarationBinding(t *testing.T) {
 		t.Fatal("tampered declaration binding should fail validation")
 	}
 }
+
+func TestDiscoverCapabilitiesSuggestedExamplesAreDiscoverable(t *testing.T) {
+	for _, entry := range capabilityCatalog {
+		if !entry.Safe {
+			continue
+		}
+		observation := DiscoverCapabilities(CapabilityDiscoveryInput{
+			SourceVersion:   "gooo-source-v1",
+			ContractVersion: "jev-capability-discovery-v1",
+			Query:           entry.ExampleQuery,
+		})
+		if observation.Status != CapabilityDiscoveryBound || len(observation.Matches) == 0 {
+			t.Fatalf("catalog example is not discoverable: key=%q query=%q observation=%+v", entry.Key, entry.ExampleQuery, observation)
+		}
+		if err := observation.Validate(); err != nil {
+			t.Fatalf("catalog example should validate: key=%q error=%v", entry.Key, err)
+		}
+	}
+}
