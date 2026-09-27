@@ -1,0 +1,19 @@
+module jev_calibration_closure_observer
+
+input source_version
+input contract_version
+input declaration
+input ir
+input generated
+input action
+input reverse_observation
+input evidence_prefix
+
+status BOUND when chained digests and producer states match
+status UNKNOWN when evidence is missing or tampered
+status DEFERRED when a producer is not explicitly BOUND
+
+constraint read_only
+constraint non_authorizing
+constraint non_executing
+constraint preserve_missing_stage_index
