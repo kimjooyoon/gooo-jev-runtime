@@ -1,0 +1,27 @@
+module jev_generation_trace_lsp_projection
+
+input generation_trace_status
+input missing_stage
+input missing_stage_index
+input metric_digest
+input evidence_prefix_digest
+input trace_observation_digest
+input read_only
+input non_authorizing
+
+status BOUND complete generation trace is shown as a clear read-only projection
+status DEFERRED generation trace producer is deferred
+status UNKNOWN missing generation trace evidence or an unsafe boundary is preserved
+
+field publishable
+field severity
+field code
+field observation_digest
+
+constraint canonical_missing_stage_index
+constraint read_only
+constraint no_improvement_claim
+constraint no_execution
+constraint no_authorization
+constraint no_edits
+constraint no_command
