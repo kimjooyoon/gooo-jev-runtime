@@ -56,6 +56,26 @@ func TestObserveCapabilityDiscoveryFeedbackPreservesDeferredBoundary(t *testing.
 	}
 }
 
+func TestObserveCapabilityDiscoveryFeedbackPreservesCapabilityBoundary(t *testing.T) {
+	observation := DiscoverCapabilities(CapabilityDiscoveryInput{
+		SourceVersion:   "gooo-source-v1",
+		ContractVersion: "jev-capability-discovery-v1",
+		Query:           "What can gooo do?",
+	})
+	observation.CanExecute = true
+	feedback := ObserveCapabilityDiscoveryFeedback(CapabilityDiscoveryFeedbackInput{
+		Observation:   observation,
+		OutcomeKnown:  true,
+		OutcomeDigest: "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+	})
+	if feedback.Status != CapabilityDiscoveryFeedbackUnknown || feedback.FirstMismatch != "capability-boundary" {
+		t.Fatalf("unexpected capability boundary feedback: %+v", feedback)
+	}
+	if err := feedback.Validate(); err != nil {
+		t.Fatalf("capability boundary feedback should validate: %v", err)
+	}
+}
+
 func TestObserveCapabilityDiscoveryFeedbackRejectsTamperedDigest(t *testing.T) {
 	observation := DiscoverCapabilities(CapabilityDiscoveryInput{
 		SourceVersion:   "gooo-source-v1",

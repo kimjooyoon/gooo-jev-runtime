@@ -65,12 +65,12 @@ func ObserveCapabilityDiscoveryFeedback(input CapabilityDiscoveryFeedbackInput) 
 	}
 
 	switch {
-	case input.Observation.Validate() != nil:
-		observation.FirstMismatch = "discovery-integrity"
-		observation.MissingStage = "capability_discovery"
 	case !input.Observation.IsReadOnly || input.Observation.CanExecute || input.Observation.CanAuthorize:
 		observation.FirstMismatch = "capability-boundary"
 		observation.MissingStage = "capability-boundary"
+	case input.Observation.Validate() != nil:
+		observation.FirstMismatch = "discovery-integrity"
+		observation.MissingStage = "capability_discovery"
 	case input.Observation.Status != CapabilityDiscoveryBound:
 		observation.FirstMismatch = input.Observation.FirstMismatch
 		if observation.FirstMismatch == "" {
