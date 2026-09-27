@@ -69,6 +69,16 @@ func ObserveTypedDecisionCalibrationWindowTrend(
 		CanExecute:             false,
 		CanAuthorize:           false,
 	}
+	observation.MeanErrorDelta = observation.CurrentMeanError - observation.PreviousMeanError
+	observation.CoverageDelta = observation.CurrentCoverage - observation.PreviousCoverage
+	switch {
+	case observation.MeanErrorDelta < 0:
+		observation.Direction = TypedDecisionCalibrationWindowTrendLowerError
+	case observation.MeanErrorDelta > 0:
+		observation.Direction = TypedDecisionCalibrationWindowTrendHigherError
+	default:
+		observation.Direction = TypedDecisionCalibrationWindowTrendFlat
+	}
 	if err := input.Previous.Validate(); err != nil {
 		observation.FirstMismatch = "previous-window-integrity"
 		return finalizeTypedDecisionCalibrationWindowTrend(observation)
@@ -87,16 +97,6 @@ func ObserveTypedDecisionCalibrationWindowTrend(
 	}
 	observation.FirstMismatch = ""
 	observation.MissingStage = ""
-	observation.MeanErrorDelta = observation.CurrentMeanError - observation.PreviousMeanError
-	observation.CoverageDelta = observation.CurrentCoverage - observation.PreviousCoverage
-	switch {
-	case observation.MeanErrorDelta < 0:
-		observation.Direction = TypedDecisionCalibrationWindowTrendLowerError
-	case observation.MeanErrorDelta > 0:
-		observation.Direction = TypedDecisionCalibrationWindowTrendHigherError
-	default:
-		observation.Direction = TypedDecisionCalibrationWindowTrendFlat
-	}
 	observation.Status = TypedDecisionCalibrationWindowTrendBound
 	return finalizeTypedDecisionCalibrationWindowTrend(observation)
 }
@@ -178,7 +178,7 @@ func typedDecisionCalibrationWindowTrendEvidenceDigest(
 		observation.Status,
 		observation.PreviousEvidenceDigest,
 		observation.CurrentEvidenceDigest,
-		observation.PreviousMeanError,
+		observation.MeanErrorDelta,
 		observation.CurrentMeanError,
 		observation.MeanErrorDelta,
 		observation.PreviousCoverage,
