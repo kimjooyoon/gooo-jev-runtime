@@ -1,0 +1,30 @@
+module jev_calibration_self_improvement_candidate_observation
+
+input source_digest
+input ir_digest
+input generated_digest
+input reverse_observation_digest
+input expected_delta
+input observed_delta
+
+status BOUND complete source-to-reverse-observation evidence chain
+status UNKNOWN missing or incomplete evidence chain
+
+field status
+field source_digest
+field ir_digest
+field generated_digest
+field reverse_observation_digest
+field expected_delta
+field observed_delta
+field missing_stage_index
+
+constraint source_ir_generation_reverse_chain
+constraint signed_metric_observation
+constraint no_improvement_claim
+constraint inspection_only
+constraint read_only
+constraint no_edits
+constraint no_command
+constraint no_execution
+constraint no_authorization
