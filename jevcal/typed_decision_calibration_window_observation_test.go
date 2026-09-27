@@ -41,7 +41,8 @@ func TestObserveTypedDecisionCalibrationWindowBound(t *testing.T) {
 		observation.KnownObservationCount != 2 ||
 		observation.WithinToleranceCount != 1 ||
 		observation.MeanAbsoluteError != 0.45 ||
-		observation.EvidenceCoverage != 1 {
+		observation.EvidenceCoverage != 1 ||
+		!calibrationWindowDigestValid(observation.EvidencePrefixDigest) {
 		t.Fatalf("observation = %#v", observation)
 	}
 	if err := observation.Validate(); err != nil {
@@ -57,7 +58,8 @@ func TestObserveTypedDecisionCalibrationWindowPreservesInsufficientWindow(t *tes
 	if observation.Status != TypedDecisionCalibrationWindowUnknown ||
 		observation.FirstMismatch != "minimum-window" ||
 		observation.MissingStage != "calibration-window" ||
-		observation.EvidenceCoverage != 1 {
+		observation.EvidenceCoverage != 1 ||
+		!calibrationWindowDigestValid(observation.EvidencePrefixDigest) {
 		t.Fatalf("observation = %#v", observation)
 	}
 	if err := observation.Validate(); err != nil {
@@ -73,5 +75,16 @@ func TestObserveTypedDecisionCalibrationWindowRejectsTampering(t *testing.T) {
 	observation.EvidenceDigest = "sha256:" + strings.Repeat("f", 64)
 	if err := observation.Validate(); err == nil {
 		t.Fatal("expected tampered window evidence to fail validation")
+	}
+}
+
+func TestObserveTypedDecisionCalibrationWindowRejectsTamperedPrefixDigest(t *testing.T) {
+	observation := ObserveTypedDecisionCalibrationWindow(TypedDecisionCalibrationWindowInput{
+		Observations:  []TypedDecisionCalibrationObservation{calibrationWindowReceipt(0.8, false, '2')},
+		MinimumWindow: 1,
+	})
+	observation.EvidencePrefixDigest = "sha256:" + strings.Repeat("f", 64)
+	if err := observation.Validate(); err == nil {
+		t.Fatal("expected tampered evidence prefix digest to fail validation")
 	}
 }

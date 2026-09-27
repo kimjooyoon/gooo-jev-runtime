@@ -34,6 +34,7 @@ type TypedDecisionCalibrationWindowObservation struct {
 	MinimumWindow          int
 	FirstMismatch           string
 	MissingStage            string
+	EvidencePrefixDigest    string
 	EvidenceDigest          string
 	IsReadOnly              bool
 	CanExecute              bool
@@ -51,6 +52,7 @@ func ObserveTypedDecisionCalibrationWindow(
 		MinimumWindow:         input.MinimumWindow,
 		FirstMismatch:         "observations",
 		MissingStage:          "calibration-window",
+		EvidencePrefixDigest:  typedDecisionCalibrationWindowEvidencePrefixDigest(nil),
 		IsReadOnly:            true,
 		CanExecute:             false,
 		CanAuthorize:           false,
@@ -65,13 +67,16 @@ func ObserveTypedDecisionCalibrationWindow(
 	}
 
 	var errorSum float64
+	evidencePrefix := make([]string, 0, len(input.Observations))
 	for index, item := range input.Observations {
 		if err := item.Validate(); err != nil {
 			observation.FirstMismatch = fmt.Sprintf("observation[%d]-integrity", index)
 			observation.MissingStage = "typed_decision_calibration"
 			observation.EvidenceCoverage = float64(observation.KnownObservationCount) / float64(observation.ObservationCount)
+			observation.EvidencePrefixDigest = typedDecisionCalibrationWindowEvidencePrefixDigest(evidencePrefix)
 			return finalizeTypedDecisionCalibrationWindow(observation)
 		}
+		evidencePrefix = append(evidencePrefix, item.EvidenceDigest)
 		if item.Status != TypedDecisionCalibrationBound {
 			observation.FirstMismatch = fmt.Sprintf("observation[%d]", index)
 			observation.MissingStage = item.MissingStage
@@ -79,6 +84,7 @@ func ObserveTypedDecisionCalibrationWindow(
 				observation.MissingStage = "typed_decision_calibration"
 			}
 			observation.EvidenceCoverage = float64(observation.KnownObservationCount) / float64(observation.ObservationCount)
+			observation.EvidencePrefixDigest = typedDecisionCalibrationWindowEvidencePrefixDigest(evidencePrefix)
 			return finalizeTypedDecisionCalibrationWindow(observation)
 		}
 		observation.KnownObservationCount++
@@ -91,11 +97,13 @@ func ObserveTypedDecisionCalibrationWindow(
 	if len(input.Observations) < input.MinimumWindow {
 		observation.FirstMismatch = "minimum-window"
 		observation.MissingStage = "calibration-window"
+		observation.EvidencePrefixDigest = typedDecisionCalibrationWindowEvidencePrefixDigest(evidencePrefix)
 		return finalizeTypedDecisionCalibrationWindow(observation)
 	}
 	observation.Status = TypedDecisionCalibrationWindowBound
 	observation.FirstMismatch = ""
 	observation.MissingStage = ""
+	observation.EvidencePrefixDigest = typedDecisionCalibrationWindowEvidencePrefixDigest(evidencePrefix)
 	observation.MeanAbsoluteError = errorSum / float64(observation.KnownObservationCount)
 	return finalizeTypedDecisionCalibrationWindow(observation)
 }
@@ -133,6 +141,9 @@ func (observation TypedDecisionCalibrationWindowObservation) Validate() error {
 	if !observation.IsReadOnly || observation.CanExecute || observation.CanAuthorize {
 		return fmt.Errorf("typed decision calibration window crossed a capability boundary")
 	}
+	if !calibrationWindowDigestValid(observation.EvidencePrefixDigest) {
+		return fmt.Errorf("typed decision calibration window evidence prefix digest is invalid")
+	}
 	if observation.EvidenceDigest != typedDecisionCalibrationWindowEvidenceDigest(observation) {
 		return fmt.Errorf("typed decision calibration window evidence digest mismatch")
 	}
@@ -156,7 +167,7 @@ func typedDecisionCalibrationWindowEvidenceDigest(
 	observation TypedDecisionCalibrationWindowObservation,
 ) string {
 	payload := fmt.Sprintf(
-		"jev-typed-decision-calibration-window|%s|%d|%d|%d|%.9f|%.9f|%d|%s|%s|%t|%t|%t",
+		"jev-typed-decision-calibration-window|%s|%d|%d|%d|%.9f|%.9f|%d|%s|%s|%s|%t|%t|%t",
 		observation.Status,
 		observation.ObservationCount,
 		observation.KnownObservationCount,
@@ -166,10 +177,17 @@ func typedDecisionCalibrationWindowEvidenceDigest(
 		observation.MinimumWindow,
 		observation.FirstMismatch,
 		observation.MissingStage,
+		observation.EvidencePrefixDigest,
 		observation.IsReadOnly,
 		observation.CanExecute,
 		observation.CanAuthorize,
 	)
+	digest := sha256.Sum256([]byte(payload))
+	return "sha256:" + hex.EncodeToString(digest[:])
+}
+
+func typedDecisionCalibrationWindowEvidencePrefixDigest(evidenceDigests []string) string {
+	payload := "jev-typed-decision-calibration-window-prefix|" + strings.Join(evidenceDigests, "|")
 	digest := sha256.Sum256([]byte(payload))
 	return "sha256:" + hex.EncodeToString(digest[:])
 }
