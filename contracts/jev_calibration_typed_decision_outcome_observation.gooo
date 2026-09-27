@@ -1,0 +1,30 @@
+module jev_calibration_typed_decision_outcome_observation
+
+input typed_decision_signal_receipt
+input outcome_known
+input observed_outcome
+input outcome_digest
+input window_size
+input tolerance
+
+status BOUND complete receipt and outcome evidence with measured calibration error
+status UNKNOWN missing receipt, outcome, sample window, or digest evidence
+
+field status
+field signal_evidence_digest
+field outcome_digest
+field selected_probability
+field confidence
+field absolute_error
+field tolerance
+field within_tolerance
+field window_size
+field first_mismatch
+field missing_stage
+field evidence_digest
+
+constraint calibration_observation_only
+constraint read_only
+constraint no_improvement_claim
+constraint no_execution
+constraint no_authorization
