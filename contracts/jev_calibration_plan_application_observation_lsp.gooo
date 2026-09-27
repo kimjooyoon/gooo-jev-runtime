@@ -1,0 +1,20 @@
+module jev_calibration_plan_application_observation_lsp
+
+input status
+input target_stage
+input observation_digest
+input reason
+
+status INFORMATION for BOUND plan application evidence
+status HINT for DEFERRED plan application evidence
+status ERROR for UNKNOWN or missing observation evidence
+
+field code
+field severity
+
+constraint inspection_only
+constraint read_only
+constraint no_edits
+constraint no_command
+constraint no_execution
+constraint no_authorization
