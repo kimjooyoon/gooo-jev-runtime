@@ -1,0 +1,25 @@
+module jev_calibration_outcome_window_delta_observation
+
+input source_version
+input contract_version
+input evidence_prefix_digest
+input observation_digest
+input expected_outcome_count
+input observed_outcome_count
+input producer_deferred
+
+status BOUND for a recorded signed outcome-count delta
+status DEFERRED for a deferred outcome-window delta producer
+status UNKNOWN for missing identity, missing evidence, or invalid counts
+
+field target_stage
+field record_digest
+field delta
+
+constraint signed_metric_observation
+constraint no_improvement_claim
+constraint read_only
+constraint no_edits
+constraint no_command
+constraint no_execution
+constraint no_authorization
