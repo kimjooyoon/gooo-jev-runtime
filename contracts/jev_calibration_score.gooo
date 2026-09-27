@@ -1,0 +1,34 @@
+contract jev_calibration_score {
+  input choice_set: ordered<choice{id:string, probability:float64}>
+  input outcomes: sequence<outcome{choice_id:string, observed:bool}>
+  input evidence: evidence{
+    source_digest:string
+    observation_digest:string
+    prefix_digest:string
+    complete:bool
+  }
+
+  validate choice_set {
+    when choice_set.empty -> UNKNOWN("empty-choice-set")
+    when choice_set.has_duplicate_id -> UNKNOWN("duplicate-choice-id")
+    when choice_set.has_probability_outside_range -> UNKNOWN("probability-out-of-range")
+    when choice_set.probability_sum != 1 -> UNKNOWN("probability-sum-not-one")
+  }
+
+  derive brier_score = mean_square_error(choice_set, outcomes)
+
+  decide calibration_score {
+    when evidence.complete == false -> UNKNOWN("incomplete-evidence")
+    when choice_set.invalid -> UNKNOWN("invalid-choice-set")
+    otherwise -> OBSERVED(brier_score)
+  }
+
+  preserve provenance {
+    source_digest
+    observation_digest
+    prefix_digest
+    choice_set_digest
+    evidence_digest
+    first_missing_stage
+  }
+}
