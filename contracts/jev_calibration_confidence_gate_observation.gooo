@@ -1,0 +1,27 @@
+module jev_calibration_confidence_gate_observation
+
+input confidence
+input threshold
+input evidence_prefix_digest
+input source_version
+input missing_stage_index
+
+status AUTO confidence meets threshold with complete evidence
+status REVIEW confidence remains below threshold with complete evidence
+status UNKNOWN missing or invalid confidence gate evidence
+
+field status
+field confidence
+field threshold
+field evidence_prefix_digest
+field source_version
+field missing_stage_index
+
+constraint inspection_only
+constraint threshold_routing_only
+constraint no_improvement_claim
+constraint read_only
+constraint no_edits
+constraint no_command
+constraint no_execution
+constraint no_authorization
