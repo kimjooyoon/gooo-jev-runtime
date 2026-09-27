@@ -1,0 +1,17 @@
+module jev_calibration_decision_route_outcome_metric_lsp
+
+input decision_route_outcome_metric
+
+status BOUND when route and outcome evidence are aligned
+status DEFERRED when the producer is deferred
+status UNKNOWN when metric evidence is invalid or incomplete
+
+field metric_signal
+field metric_digest
+field observation_digest
+field evidence_digest
+
+constraint observation_only
+constraint read_only
+constraint no_execution
+constraint no_authorization
