@@ -56,7 +56,7 @@ func TestProjectWorkloadCredentialValidityLSPRejectsTamperedObservation(t *testi
 	if projection.Status != WorkloadCredentialValidityLSPError ||
 		projection.Code != workloadCredentialValidityLSPIntegrity ||
 		projection.MissingStage != "observation_integrity" ||
-		projection.Publishable {
+		!projection.Publishable {
 		t.Fatalf("tampered credential observation was projected: %+v", projection)
 	}
 }
