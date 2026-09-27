@@ -1,0 +1,23 @@
+module jev_calibration_plan_application_reverse_observation
+
+input source_version
+input contract_version
+input proposal_status
+input proposal_plan_digest
+input expected_plan_digest
+input reverse_observation_status
+input reverse_observation_digest
+input producer_deferred
+
+status BOUND for aligned plan proposal and reverse observation
+status DEFERRED for deferred producer, proposal, or reverse observation
+status UNKNOWN for missing identity, missing evidence, mismatched digest, or unresolved status
+
+field target_stage
+field observation_digest
+
+constraint read_only
+constraint no_edits
+constraint no_command
+constraint no_execution
+constraint no_authorization
