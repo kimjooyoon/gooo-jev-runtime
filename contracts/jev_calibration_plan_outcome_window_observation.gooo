@@ -1,0 +1,23 @@
+module jev_calibration_plan_outcome_window_observation
+
+input source_version
+input contract_version
+input plan_observation_digest
+input expected_plan_observation_digest
+input outcome_window_record_digest
+input expected_outcome_window_record_digest
+input producer_deferred
+
+status BOUND for aligned plan observation and outcome-window record
+status DEFERRED for a deferred plan-outcome producer
+status UNKNOWN for missing identity, missing evidence, mismatched digest, or unresolved chain
+
+field target_stage
+field chain_digest
+
+constraint provenance_chain_observation
+constraint read_only
+constraint no_edits
+constraint no_command
+constraint no_execution
+constraint no_authorization
