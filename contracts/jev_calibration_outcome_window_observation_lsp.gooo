@@ -1,0 +1,21 @@
+module jev_calibration_outcome_window_observation_lsp
+
+input status
+input target_stage
+input record_digest
+input reason
+
+status INFORMATION for BOUND outcome-window evidence
+status HINT for DEFERRED outcome-window evidence
+status ERROR for UNKNOWN or missing outcome evidence
+
+field code
+field severity
+
+constraint inspection_only
+constraint metric_projection
+constraint read_only
+constraint no_edits
+constraint no_command
+constraint no_execution
+constraint no_authorization
