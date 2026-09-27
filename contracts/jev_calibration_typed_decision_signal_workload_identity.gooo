@@ -1,0 +1,16 @@
+module jev_calibration_typed_decision_signal_workload_identity
+input source_version
+input contract_version
+input trust_domain
+input spiffe_id
+input svid_format
+input credential_digest
+input valid_until_unix
+input observed_at_unix
+input signal_evidence_digest
+input non_authorizing
+status BOUND
+status UNKNOWN
+fields status source_version contract_version trust_domain spiffe_id svid_format credential_digest valid_until_unix observed_at_unix signal_evidence_digest identity_digest binding_digest first_mismatch non_executing non_authorizing can_execute can_authorize
+constraints observation_only preserve_workload_identity preserve_signal_evidence no_identity_issuance no_execution no_authorization no_edits no_command
+
