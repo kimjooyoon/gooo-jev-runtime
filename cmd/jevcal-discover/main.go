@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"os"
 
@@ -36,10 +37,10 @@ type discoveryJSON struct {
 	MissingStage               string      `json:"missing_stage"`
 	TargetStage                string      `json:"target_stage"`
 	Reason                     string      `json:"reason"`
-	DiscoveryDigest             string      `json:"discovery_digest"`
+	DiscoveryDigest            string      `json:"discovery_digest"`
 	DeclarationSourceDigest    string      `json:"declaration_source_digest,omitempty"`
 	DeclarationObservedSignals []string    `json:"declaration_observed_signals,omitempty"`
-	DeclarationBound            bool        `json:"declaration_bound"`
+	DeclarationBound           bool        `json:"declaration_bound"`
 	IsReadOnly                 bool        `json:"is_read_only"`
 	CanExecute                 bool        `json:"can_execute"`
 	CanAuthorize               bool        `json:"can_authorize"`
@@ -80,11 +81,37 @@ func render(observation jevcal.CapabilityDiscoveryObservation) discoveryJSON {
 }
 
 func main() {
+	var (
+		queryFlag           string
+		sourceVersionFlag   string
+		contractVersionFlag string
+		declarationFileFlag string
+	)
+	flag.StringVar(&queryFlag, "query", "", "natural-language capability query")
+	flag.StringVar(&sourceVersionFlag, "source-version", "", "source identity for direct query mode")
+	flag.StringVar(&contractVersionFlag, "contract-version", "", "contract identity for direct query mode")
+	flag.StringVar(&declarationFileFlag, "declaration-file", "", "optional .gooo declaration file for direct query mode")
+	flag.Parse()
+
 	var input request
-	if err := json.NewDecoder(os.Stdin).Decode(&input); err != nil {
+	directQuery := queryFlag != "" || sourceVersionFlag != "" || contractVersionFlag != "" || declarationFileFlag != ""
+	if directQuery {
+		input.SourceVersion = sourceVersionFlag
+		input.ContractVersion = contractVersionFlag
+		input.Query = queryFlag
+		if declarationFileFlag != "" {
+			declaration, err := os.ReadFile(declarationFileFlag)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "read declaration file: %v\n", err)
+				os.Exit(64)
+			}
+			input.Declaration = string(declaration)
+		}
+	} else if err := json.NewDecoder(os.Stdin).Decode(&input); err != nil {
 		fmt.Fprintf(os.Stderr, "read capability discovery request: %v\n", err)
 		os.Exit(64)
 	}
+
 	discoveryInput := jevcal.CapabilityDiscoveryInput{
 		SourceVersion:   input.SourceVersion,
 		ContractVersion: input.ContractVersion,
