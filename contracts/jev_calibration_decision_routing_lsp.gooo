@@ -1,0 +1,18 @@
+module jev_calibration_decision_routing_lsp
+
+input route_status
+input target_stage
+input decision_digest
+
+diagnostic ACCEPT_CANDIDATE as jev.route.accept_candidate
+diagnostic REVIEW_CANDIDATE as jev.route.review_candidate
+diagnostic ABSTAIN_CANDIDATE as jev.route.abstain_candidate
+diagnostic DEFERRED as jev.route.deferred
+diagnostic UNKNOWN as jev.route.unknown
+
+constraint read_only
+constraint no_edits
+constraint no_command
+constraint no_execution
+constraint no_authorization
+constraint preserve_decision_digest
