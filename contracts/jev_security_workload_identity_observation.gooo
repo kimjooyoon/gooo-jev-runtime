@@ -1,0 +1,23 @@
+module jev_security_workload_identity_observation
+
+input spiffe_id
+input audience
+input capabilities
+input evidence_prefix_digest
+
+status BOUND complete workload identity observation
+status UNKNOWN missing or incomplete identity evidence
+
+field status
+field spiffe_id
+field audience
+field capabilities
+field evidence_prefix_digest
+
+constraint observation_only
+constraint workload_identity_binding
+constraint no_authorization
+constraint no_execution
+constraint read_only
+constraint no_edits
+constraint no_command
