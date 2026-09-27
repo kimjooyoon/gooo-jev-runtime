@@ -1,0 +1,29 @@
+module jev_provenance_stage_coverage_observation_lsp
+
+input status
+input coverage_numerator
+input coverage_denominator
+input coverage_percent
+input missing_stage
+input target_stage
+input observation_digest
+input evidence_prefix_digest
+
+status BOUND complete provenance stages are observed and digested
+status DEFERRED provenance stage producer is deferred
+status UNKNOWN missing provenance evidence remains unresolved
+status ERROR provenance evidence crossed an unsafe boundary
+
+field publishable
+field severity
+field code
+field missing_stage_index
+field projection_digest
+
+constraint observation_only
+constraint no_improvement_claim
+constraint no_execution
+constraint no_authorization
+constraint read_only
+constraint no_edits
+constraint no_command
