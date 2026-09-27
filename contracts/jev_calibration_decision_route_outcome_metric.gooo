@@ -1,0 +1,28 @@
+module jev_calibration_decision_route_outcome_metric
+
+input decision_route_reverse_observation
+
+input source_version
+input contract_version
+input route_status
+input route_record_digest
+input decision_digest
+input expected_route_status
+input observed_route_status
+input outcome_digest
+input target_stage
+input reason
+input observation_digest
+
+status BOUND only for aligned route and outcome evidence
+status DEFERRED when the reverse observation producer is deferred
+status UNKNOWN when identity, evidence, or capability boundaries are incomplete
+
+field metric_signal
+field metric_digest
+
+constraint preserve_observation_state
+constraint observation_only
+constraint read_only
+constraint no_execution
+constraint no_authorization
