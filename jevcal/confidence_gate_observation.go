@@ -1,6 +1,9 @@
 package jevcal
 
-import "math"
+import (
+	"math"
+	"strings"
+)
 
 // JEVConfidenceGateObservationStatus identifies the safe routing boundary for a
 // calibrated decision without claiming that the decision is correct.
@@ -18,6 +21,7 @@ type JEVConfidenceGateObservation struct {
 	Status               JEVConfidenceGateObservationStatus
 	Confidence           float64
 	Threshold            float64
+	ConfidenceMethod     string
 	EvidencePrefixDigest string
 	SourceVersion        string
 	MissingStageIndex    int
@@ -31,14 +35,17 @@ type JEVConfidenceGateObservation struct {
 func ObserveJEVConfidenceGate(
 	confidence float64,
 	threshold float64,
+	confidenceMethod string,
 	evidencePrefixDigest string,
 	sourceVersion string,
 	missingStageIndex int,
 ) JEVConfidenceGateObservation {
+	confidenceMethod = strings.TrimSpace(confidenceMethod)
 	observation := JEVConfidenceGateObservation{
 		Status:               JEVConfidenceGateUnknown,
 		Confidence:           confidence,
 		Threshold:            threshold,
+		ConfidenceMethod:     confidenceMethod,
 		EvidencePrefixDigest: evidencePrefixDigest,
 		SourceVersion:        sourceVersion,
 		MissingStageIndex:    missingStageIndex,
@@ -51,6 +58,8 @@ func ObserveJEVConfidenceGate(
 		math.IsNaN(threshold) || math.IsInf(threshold, 0) ||
 		confidence < 0 || confidence > 1 ||
 		threshold < 0 || threshold > 1 ||
+		!validTypedDecisionConfidenceMethod(confidenceMethod) ||
+		confidenceMethod == TypedDecisionConfidenceMethodUnspecified ||
 		evidencePrefixDigest == "" || sourceVersion == "" {
 		return observation
 	}
