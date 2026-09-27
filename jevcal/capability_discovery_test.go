@@ -17,6 +17,9 @@ func TestDiscoverCapabilitiesOverviewIsBoundAndReadOnly(t *testing.T) {
 	if !hasCapabilityExample(observation.SuggestedQueries, "How do I generate a canonical .gooo declaration?") {
 		t.Fatalf("overview omitted an actionable example query: %+v", observation.SuggestedQueries)
 	}
+	if !hasCapabilityOperation(observation.Matches, "generation", "write_generated_declaration") {
+		t.Fatalf("overview omitted an actionable next operation: %+v", observation.Matches)
+	}
 }
 
 func TestDiscoverCapabilitiesPreservesDeferredBoundary(t *testing.T) {
@@ -45,6 +48,15 @@ func TestDiscoverCapabilitiesUnknownRetainsCatalogBoundary(t *testing.T) {
 	if err := observation.Validate(); err != nil {
 		t.Fatalf("unknown observation should validate: %v", err)
 	}
+}
+
+func hasCapabilityOperation(matches []CapabilityDiscoveryMatch, key, expected string) bool {
+	for _, match := range matches {
+		if match.Key == key && match.NextOperation == expected {
+			return true
+		}
+	}
+	return false
 }
 
 func hasCapabilityExample(values []string, expected string) bool {

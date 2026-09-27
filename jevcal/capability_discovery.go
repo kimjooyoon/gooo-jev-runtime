@@ -27,9 +27,10 @@ type CapabilityDiscoveryInput struct {
 type CapabilityDiscoveryMatch struct {
 	Key     string
 	Summary      string
-	ExampleQuery string
-	Stage        string
-	Status       CapabilityDiscoveryStatus
+	ExampleQuery   string
+	NextOperation string
+	Stage         string
+	Status        CapabilityDiscoveryStatus
 }
 
 // CapabilityDiscoveryObservation explains what this runtime can recognize
@@ -55,20 +56,21 @@ type CapabilityDiscoveryObservation struct {
 type capabilityCatalogEntry struct {
 	Key     string
 	Summary      string
-	ExampleQuery string
-	Stage        string
-	Aliases      []string
-	Safe         bool
+	ExampleQuery   string
+	NextOperation string
+	Stage         string
+	Aliases       []string
+	Safe          bool
 }
 
 var capabilityCatalog = []capabilityCatalogEntry{
-	{Key: "feedback-trend", ExampleQuery: "How has gooo feedback changed over time?", Summary: "compare feedback and calibration windows with evidence lineage", Stage: "feedback_observation", Aliases: []string{"feedback", "trend", "calibration", "피드백", "추세"}, Safe: true},
-	{Key: "generation", ExampleQuery: "How do I generate a canonical .gooo declaration?", Summary: "produce and inspect generated artifacts with provenance", Stage: "generation_observation", Aliases: []string{"generate", "generation", "codegen", "code generation", "생성", "코드 생성"}, Safe: true},
-	{Key: "provenance", ExampleQuery: "Where did this .gooo declaration come from?", Summary: "trace source, generation, and reverse-observation evidence", Stage: "provenance_observation", Aliases: []string{"provenance", "origin", "reverse observation", "기원", "역관찰"}, Safe: true},
-	{Key: "security-boundary", ExampleQuery: "What external security boundary is required?", Summary: "observe workload identity and network capability boundaries", Stage: "security_capability_boundary", Aliases: []string{"security", "spiffe", "workload identity", "network allowlist", "credential", "보안"}, Safe: false},
-	{Key: "support-triage", ExampleQuery: "How should I triage this gooo support request?", Summary: "structure support-triage workflows and their next safe observations", Stage: "support_triage_observation", Aliases: []string{"support", "support triage", "triage", "workflow", "지원", "분류"}, Safe: true},
-	{Key: "syntax-completion", ExampleQuery: "How do I complete a .gooo declaration?", Summary: "suggest syntax completions through a read-only language-service path", Stage: "syntax_completion", Aliases: []string{"syntax", "completion", "autocomplete", "lsp", "문법", "완성"}, Safe: true},
-	{Key: "execution-boundary", ExampleQuery: "What explicit boundary is needed before execution?", Summary: "execution or authorization requires an explicit external boundary", Stage: "execution_or_authorization_boundary", Aliases: []string{"execute", "execution", "run", "authorize", "authorization", "permission", "실행", "권한"}, Safe: false},
+	{Key: "feedback-trend", NextOperation: "compare_feedback_window", ExampleQuery: "How has gooo feedback changed over time?", Summary: "compare feedback and calibration windows with evidence lineage", Stage: "feedback_observation", Aliases: []string{"feedback", "trend", "calibration", "피드백", "추세"}, Safe: true},
+	{Key: "generation", NextOperation: "write_generated_declaration", ExampleQuery: "How do I generate a canonical .gooo declaration?", Summary: "produce and inspect generated artifacts with provenance", Stage: "generation_observation", Aliases: []string{"generate", "generation", "codegen", "code generation", "생성", "코드 생성"}, Safe: true},
+	{Key: "provenance", NextOperation: "inspect_provenance_chain", ExampleQuery: "Where did this .gooo declaration come from?", Summary: "trace source, generation, and reverse-observation evidence", Stage: "provenance_observation", Aliases: []string{"provenance", "origin", "reverse observation", "기원", "역관찰"}, Safe: true},
+	{Key: "security-boundary", NextOperation: "bind_external_security_evidence", ExampleQuery: "What external security boundary is required?", Summary: "observe workload identity and network capability boundaries", Stage: "security_capability_boundary", Aliases: []string{"security", "spiffe", "workload identity", "network allowlist", "credential", "보안"}, Safe: false},
+	{Key: "support-triage", NextOperation: "inspect_support_route", ExampleQuery: "How should I triage this gooo support request?", Summary: "structure support-triage workflows and their next safe observations", Stage: "support_triage_observation", Aliases: []string{"support", "support triage", "triage", "workflow", "지원", "분류"}, Safe: true},
+	{Key: "syntax-completion", NextOperation: "edit_declaration", ExampleQuery: "How do I complete a .gooo declaration?", Summary: "suggest syntax completions through a read-only language-service path", Stage: "syntax_completion", Aliases: []string{"syntax", "completion", "autocomplete", "lsp", "문법", "완성"}, Safe: true},
+	{Key: "execution-boundary", NextOperation: "provide_explicit_external_boundary", ExampleQuery: "What explicit boundary is needed before execution?", Summary: "execution or authorization requires an explicit external boundary", Stage: "execution_or_authorization_boundary", Aliases: []string{"execute", "execution", "run", "authorize", "authorization", "permission", "실행", "권한"}, Safe: false},
 }
 
 // CapabilityDiscoveryCatalog returns a stable copy of the catalog exposed to
@@ -169,7 +171,7 @@ func discoverMatches(query string) []CapabilityDiscoveryMatch {
 }
 
 func matchForEntry(entry capabilityCatalogEntry) CapabilityDiscoveryMatch {
-	return CapabilityDiscoveryMatch{Key: entry.Key, Summary: entry.Summary, ExampleQuery: entry.ExampleQuery, Stage: entry.Stage, Status: catalogStatus(entry)}
+	return CapabilityDiscoveryMatch{Key: entry.Key, Summary: entry.Summary, ExampleQuery: entry.ExampleQuery, NextOperation: entry.NextOperation, Stage: entry.Stage, Status: catalogStatus(entry)}
 }
 
 func uniqueMatches(matches []CapabilityDiscoveryMatch) []CapabilityDiscoveryMatch {
@@ -266,7 +268,7 @@ func capabilityDiscoveryDigest(observation CapabilityDiscoveryObservation) strin
 		observation.Reason,
 	}
 	for _, match := range observation.Matches {
-		parts = append(parts, match.Key, match.Summary, match.ExampleQuery, match.Stage, string(match.Status))
+		parts = append(parts, match.Key, match.Summary, match.ExampleQuery, match.NextOperation, match.Stage, string(match.Status))
 	}
 	parts = append(parts, observation.Suggestions...)
 	parts = append(parts, observation.SuggestedQueries...)
