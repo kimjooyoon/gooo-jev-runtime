@@ -63,22 +63,22 @@ type GenerationTraceObservation struct {
 // complete, aligned evidence.
 func ObserveGenerationTrace(input GenerationTraceInput) GenerationTraceObservation {
 	observation := GenerationTraceObservation{
-		Status:            GenerationTraceUnknown,
-		SourceVersion:     input.SourceVersion,
-		ContractVersion:   input.ContractVersion,
-		ContractName:      input.ContractName,
-		ContractDigest:    input.ContractDigest,
-		IRDigest:          input.IRDigest,
-		GeneratedArtifactDigest:  input.GeneratedArtifactDigest,
-		ReverseObservationDigest: input.ReverseObservationDigest,
-		MetricDigest:          input.MetricDigest,
-		EvidencePrefixDigest:  input.EvidencePrefixDigest,
-		TargetStage:           "generation_trace_evidence",
-		TraceSignal:           generationTraceUnknownSignal,
-		ObservationalOnly:     true,
-		ClaimsImprovement:     false,
-		CanExecute:            false,
-		CanAuthorize:          false,
+		Status:                      GenerationTraceUnknown,
+		SourceVersion:               input.SourceVersion,
+		ContractVersion:             input.ContractVersion,
+		ContractName:                input.ContractName,
+		ContractDigest:              input.ContractDigest,
+		IRDigest:                    input.IRDigest,
+		GeneratedArtifactDigest:     input.GeneratedArtifactDigest,
+		ReverseObservationDigest:    input.ReverseObservationDigest,
+		MetricDigest:                input.MetricDigest,
+		EvidencePrefixDigest:        input.EvidencePrefixDigest,
+		TargetStage:                 "generation_trace_evidence",
+		TraceSignal:                 generationTraceUnknownSignal,
+		ObservationalOnly:           true,
+		ClaimsImprovement:           false,
+		CanExecute:                  false,
+		CanAuthorize:                false,
 	}
 
 	switch {
@@ -126,7 +126,7 @@ func ObserveGenerationTrace(input GenerationTraceInput) GenerationTraceObservati
 	default:
 		observation.Status = GenerationTraceBound
 		observation.MissingStage = ""
-		observation.TargetStage = ""
+		observation.TargetStage = "generation_trace_evidence"
 		observation.Reason = "declaration, IR, generation, reverse observation, and metric evidence are linked"
 		observation.TraceSignal = generationTraceBoundSignal
 	}
