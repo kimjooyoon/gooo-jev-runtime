@@ -47,6 +47,26 @@ func TestProposeCapabilityDiscoveryReplanReviewsWithoutAcceptedOutcome(t *testin
 	}
 }
 
+func TestProposeCapabilityDiscoveryReplanPreservesInvalidWindowAsUnknown(t *testing.T) {
+	window := CapabilityDiscoveryFeedbackWindowObservation{
+		Status:          CapabilityDiscoveryFeedbackWindowBound,
+		EvidenceDigest:  "not-a-digest",
+		ObservationCount: 1,
+		KnownObservationCount: 1,
+		AcceptedCount:   1,
+		MinimumWindow:   1,
+		EvidenceCoverage: 1,
+		IsReadOnly:      true,
+	}
+	proposal := ProposeCapabilityDiscoveryReplan(window)
+	if proposal.Status != CapabilityDiscoveryReplanUnknown || proposal.FirstMismatch != "window-integrity" {
+		t.Fatalf("unexpected invalid-window proposal: %+v", proposal)
+	}
+	if err := proposal.Validate(); err != nil {
+		t.Fatalf("invalid-window UNKNOWN should validate: %v", err)
+	}
+}
+
 func TestProposeCapabilityDiscoveryReplanRejectsTampering(t *testing.T) {
 	window := ObserveCapabilityDiscoveryFeedbackWindow(CapabilityDiscoveryFeedbackWindowInput{
 		Observations: []CapabilityDiscoveryFeedbackObservation{capabilityFeedbackForWindowTest(t, true)},

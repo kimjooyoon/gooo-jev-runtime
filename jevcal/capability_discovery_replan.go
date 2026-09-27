@@ -104,9 +104,8 @@ func (observation CapabilityDiscoveryReplanObservation) Validate() error {
 	if !observation.IsReadOnly || observation.CanExecute || observation.CanAuthorize {
 		return fmt.Errorf("capability discovery replan crossed an execution or authorization boundary")
 	}
-	if !capabilityFeedbackWindowDigestValid(observation.WindowDigest) ||
-		!capabilityFeedbackWindowDigestValid(observation.EvidenceDigest) {
-		return fmt.Errorf("capability discovery replan digest is invalid")
+	if !capabilityFeedbackWindowDigestValid(observation.EvidenceDigest) {
+		return fmt.Errorf("capability discovery replan evidence digest is invalid")
 	}
 	if observation.ObservationCount < 0 || observation.KnownCount < 0 ||
 		observation.KnownCount > observation.ObservationCount || observation.AcceptedCount < 0 ||
@@ -119,6 +118,9 @@ func (observation CapabilityDiscoveryReplanObservation) Validate() error {
 			return fmt.Errorf("unknown capability discovery replan lost its boundary")
 		}
 		return nil
+	}
+	if !capabilityFeedbackWindowDigestValid(observation.WindowDigest) {
+		return fmt.Errorf("bound capability discovery replan window digest is invalid")
 	}
 	if observation.FirstMismatch != "" || observation.MissingStage != "" || observation.NextOperation == "" {
 		return fmt.Errorf("bound capability discovery replan is incomplete")
