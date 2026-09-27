@@ -178,7 +178,7 @@ func typedDecisionCalibrationWindowTrendEvidenceDigest(
 		observation.Status,
 		observation.PreviousEvidenceDigest,
 		observation.CurrentEvidenceDigest,
-		observation.MeanErrorDelta,
+		observation.PreviousMeanError,
 		observation.CurrentMeanError,
 		observation.MeanErrorDelta,
 		observation.PreviousCoverage,
