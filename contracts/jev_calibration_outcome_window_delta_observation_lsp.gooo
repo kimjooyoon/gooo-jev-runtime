@@ -1,0 +1,23 @@
+module jev_calibration_outcome_window_delta_observation_lsp
+
+input status
+input target_stage
+input record_digest
+input delta
+input reason
+
+status INFORMATION for BOUND signed outcome-window delta
+status HINT for DEFERRED signed outcome-window delta
+status ERROR for UNKNOWN or missing delta evidence
+
+field code
+field severity
+
+constraint inspection_only
+constraint signed_metric_projection
+constraint no_improvement_claim
+constraint read_only
+constraint no_edits
+constraint no_command
+constraint no_execution
+constraint no_authorization
