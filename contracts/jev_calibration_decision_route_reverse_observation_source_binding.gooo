@@ -1,0 +1,18 @@
+module jev_calibration_decision_route_reverse_observation_source_binding
+input source_version
+input contract_version
+input source_text
+input route_status
+input route_record_digest
+input decision_digest
+input expected_route_status
+input observed_route_status
+input outcome_digest
+input producer_deferred
+input non_authorizing
+status BOUND
+status DEFERRED
+status UNKNOWN
+fields status source_version contract_version source_digest observation_digest binding_digest first_mismatch target_stage non_executing non_authorizing read_only
+constraints observation_only preserve_source_text preserve_decision_digest no_outcome_judgment read_only no_execution no_authorization no_edits no_command
+
