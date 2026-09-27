@@ -2,6 +2,7 @@ module jev_calibration_confidence_gate_observation
 
 input confidence
 input threshold
+input confidence_method
 input evidence_prefix_digest
 input source_version
 input missing_stage_index
@@ -13,12 +14,14 @@ status UNKNOWN missing or invalid confidence gate evidence
 field status
 field confidence
 field threshold
+field confidence_method
 field evidence_prefix_digest
 field source_version
 field missing_stage_index
 
 constraint inspection_only
 constraint threshold_routing_only
+constraint confidence_method_required
 constraint no_improvement_claim
 constraint read_only
 constraint no_edits
