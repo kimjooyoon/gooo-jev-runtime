@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"math"
 	"sort"
-	"strconv"
 	"strings"
 )
 
@@ -174,9 +173,15 @@ func (receipt TypedDecisionSignalReceipt) Validate() error {
 		receipt.FirstMismatch != "" ||
 		receipt.ProbabilityCount == 0 ||
 		receipt.ThresholdMet == receipt.ReviewRequired ||
-		math.Abs(receipt.SelectedProbability-receipt.AcceptanceThreshold) > 1 ||
+		math.IsNaN(receipt.SelectedProbability) ||
+		math.IsInf(receipt.SelectedProbability, 0) ||
+		math.IsNaN(receipt.Confidence) ||
+		math.IsInf(receipt.Confidence, 0) ||
+		math.IsNaN(receipt.AcceptanceThreshold) ||
+		math.IsInf(receipt.AcceptanceThreshold, 0) ||
 		receipt.SelectedProbability < 0 || receipt.SelectedProbability > 1 ||
-		receipt.Confidence < 0 || receipt.Confidence > 1 {
+		receipt.Confidence < 0 || receipt.Confidence > 1 ||
+		receipt.AcceptanceThreshold < 0 || receipt.AcceptanceThreshold > 1 {
 		return fmt.Errorf("bound typed decision signal is incomplete")
 	}
 	return nil
@@ -237,6 +242,4 @@ func typedDecisionHash(value string) string {
 	sum := sha256.Sum256([]byte(value))
 	return "sha256:" + hex.EncodeToString(sum[:])
 }
-
-var _ = strconv.FormatBool
 
