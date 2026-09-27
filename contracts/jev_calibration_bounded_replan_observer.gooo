@@ -1,0 +1,19 @@
+module jev_calibration_bounded_replan_observer
+
+input previous_closure_evidence
+input current_closure_evidence
+
+status PROPOSED when current closure is unresolved
+status NO_ACTION when closure becomes BOUND or remains unchanged
+status DEFERRED when a producer is deferred
+status UNKNOWN when source or contract identity changes
+
+field target_stage
+field missing_stage_index
+field previous_observation_digest
+field current_observation_digest
+field plan_digest
+
+constraint read_only
+constraint no_execution
+constraint no_authorization
