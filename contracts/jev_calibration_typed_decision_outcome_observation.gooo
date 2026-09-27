@@ -15,6 +15,7 @@ field signal_evidence_digest
 field outcome_digest
 field selected_probability
 field confidence
+field confidence_method
 field absolute_error
 field tolerance
 field within_tolerance

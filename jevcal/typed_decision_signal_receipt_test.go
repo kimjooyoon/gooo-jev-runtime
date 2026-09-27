@@ -115,3 +115,50 @@ func TestObserveTypedDecisionSignalRejectsTamperedReceipt(t *testing.T) {
 	}
 }
 
+func TestObserveTypedDecisionSignalPreservesConfidenceMethod(t *testing.T) {
+	receipt := ObserveTypedDecisionSignal(TypedDecisionSignalInput{
+		SourceVersion:       "source-v1",
+		ContractVersion:     "contract-v1",
+		ModelRevision:       "jev-1.13",
+		QuestionID:          "route",
+		RequestDigest:       typedDecisionRequestDigest,
+		QuestionKind:        TypedDecisionQuestionChoice,
+		SelectedValue:       "human",
+		Probabilities:       map[string]float64{"human": 0.8, "automate": 0.2},
+		SelectedProbability: 0.8,
+		Confidence:          0.9,
+		ConfidenceMethod:    TypedDecisionConfidenceMethodTopTwoMargin,
+		AcceptanceThreshold: 0.8,
+		NonAuthorizing:      true,
+	})
+	if receipt.Status != TypedDecisionSignalBound || receipt.ConfidenceMethod != TypedDecisionConfidenceMethodTopTwoMargin {
+		t.Fatalf("receipt = %#v", receipt)
+	}
+	if err := receipt.Validate(); err != nil {
+		t.Fatalf("receipt with confidence method invalid: %v", err)
+	}
+}
+
+func TestObserveTypedDecisionSignalRejectsUnknownConfidenceMethod(t *testing.T) {
+	receipt := ObserveTypedDecisionSignal(TypedDecisionSignalInput{
+		SourceVersion:       "source-v1",
+		ContractVersion:     "contract-v1",
+		ModelRevision:       "jev-1.13",
+		QuestionID:          "route",
+		RequestDigest:       typedDecisionRequestDigest,
+		QuestionKind:        TypedDecisionQuestionChoice,
+		SelectedValue:       "human",
+		Probabilities:       map[string]float64{"human": 0.8, "automate": 0.2},
+		SelectedProbability: 0.8,
+		Confidence:          0.9,
+		ConfidenceMethod:    "untrusted-method",
+		AcceptanceThreshold: 0.8,
+		NonAuthorizing:      true,
+	})
+	if receipt.Status != TypedDecisionSignalUnknown || receipt.FirstMismatch != "confidence-method" {
+		t.Fatalf("receipt = %#v", receipt)
+	}
+	if err := receipt.Validate(); err != nil {
+		t.Fatalf("unknown receipt invalid: %v", err)
+	}
+}

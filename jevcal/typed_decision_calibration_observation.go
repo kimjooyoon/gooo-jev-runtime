@@ -35,6 +35,7 @@ type TypedDecisionCalibrationObservation struct {
 	SignalEvidenceDigest string
 	SelectedProbability  float64
 	Confidence           float64
+	ConfidenceMethod     string
 	OutcomeKnown         bool
 	ObservedOutcome      bool
 	OutcomeDigest        string
@@ -64,6 +65,7 @@ func ObserveTypedDecisionCalibration(
 		SignalEvidenceDigest: input.Receipt.EvidenceDigest,
 		SelectedProbability:  input.Receipt.SelectedProbability,
 		Confidence:           input.Receipt.Confidence,
+		ConfidenceMethod:     input.Receipt.ConfidenceMethod,
 		OutcomeKnown:         input.OutcomeKnown,
 		ObservedOutcome:      input.ObservedOutcome,
 		OutcomeDigest:        input.OutcomeDigest,
@@ -146,6 +148,7 @@ func (observation TypedDecisionCalibrationObservation) Validate() error {
 		observation.WindowSize <= 0 ||
 		!finiteCalibrationUnit(observation.SelectedProbability) ||
 		!finiteCalibrationUnit(observation.Confidence) ||
+		!validTypedDecisionConfidenceMethod(observation.ConfidenceMethod) ||
 		!finiteCalibrationUnit(observation.Tolerance) ||
 		observation.FirstMismatch != "" ||
 		observation.MissingStage != "" {
@@ -179,7 +182,7 @@ func typedDecisionCalibrationEvidenceDigest(
 	observation TypedDecisionCalibrationObservation,
 ) string {
 	payload := fmt.Sprintf(
-		"jev-typed-decision-calibration|%s|%s|%s|%s|%s|%0.9f|%0.9f|%t|%t|%s|%d|%0.9f|%0.9f|%t|%s|%s|%t|%t|%t",
+		"jev-typed-decision-calibration|%s|%s|%s|%s|%s|%0.9f|%0.9f|%s|%t|%t|%s|%d|%0.9f|%0.9f|%t|%s|%s|%t|%t|%t",
 		observation.Status,
 		observation.SourceVersion,
 		observation.ContractVersion,
@@ -187,6 +190,7 @@ func typedDecisionCalibrationEvidenceDigest(
 		observation.QuestionID,
 		observation.SelectedProbability,
 		observation.Confidence,
+		observation.ConfidenceMethod,
 		observation.OutcomeKnown,
 		observation.ObservedOutcome,
 		observation.OutcomeDigest,

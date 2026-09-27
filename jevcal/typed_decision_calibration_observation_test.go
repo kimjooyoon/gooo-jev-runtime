@@ -17,6 +17,7 @@ func calibrationReceipt() TypedDecisionSignalReceipt {
 		Probabilities:       map[string]float64{"accept": 0.8, "review": 0.2},
 		SelectedProbability: 0.8,
 		Confidence:          0.9,
+		ConfidenceMethod:    TypedDecisionConfidenceMethodCalibrated,
 		AcceptanceThreshold: 0.7,
 		NonAuthorizing:      true,
 	})

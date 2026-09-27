@@ -16,6 +16,12 @@ const (
 
 	TypedDecisionSignalBound  DecisionRouteReverseObservationStatus = "BOUND"
 	TypedDecisionSignalUnknown DecisionRouteReverseObservationStatus = "UNKNOWN"
+
+	TypedDecisionConfidenceMethodUnspecified       = "unspecified"
+	TypedDecisionConfidenceMethodCalibrated       = "calibrated"
+	TypedDecisionConfidenceMethodMaxProbability   = "max_probability"
+	TypedDecisionConfidenceMethodTopTwoMargin     = "top_two_margin"
+	TypedDecisionConfidenceMethodOneMinusEntropy  = "one_minus_entropy"
 )
 
 type TypedDecisionSignalInput struct {
@@ -29,6 +35,7 @@ type TypedDecisionSignalInput struct {
 	Probabilities       map[string]float64
 	SelectedProbability float64
 	Confidence          float64
+	ConfidenceMethod    string
 	AcceptanceThreshold float64
 	NonAuthorizing      bool
 }
@@ -48,6 +55,7 @@ type TypedDecisionSignalReceipt struct {
 	ProbabilityCount    int
 	SelectedProbability float64
 	Confidence          float64
+	ConfidenceMethod    string
 	AcceptanceThreshold float64
 	ThresholdMet        bool
 	ReviewRequired      bool
@@ -62,6 +70,10 @@ type TypedDecisionSignalReceipt struct {
 // ObserveTypedDecisionSignal validates a typed JEV signal and preserves its
 // uncertainty. A threshold is a candidate gate, never an execution grant.
 func ObserveTypedDecisionSignal(input TypedDecisionSignalInput) TypedDecisionSignalReceipt {
+	confidenceMethod := strings.TrimSpace(input.ConfidenceMethod)
+	if confidenceMethod == "" {
+		confidenceMethod = TypedDecisionConfidenceMethodUnspecified
+	}
 	receipt := TypedDecisionSignalReceipt{
 		Status:              TypedDecisionSignalUnknown,
 		SourceVersion:       input.SourceVersion,
@@ -75,6 +87,7 @@ func ObserveTypedDecisionSignal(input TypedDecisionSignalInput) TypedDecisionSig
 		ProbabilityCount:    len(input.Probabilities),
 		SelectedProbability: input.SelectedProbability,
 		Confidence:          input.Confidence,
+		ConfidenceMethod:    confidenceMethod,
 		AcceptanceThreshold: input.AcceptanceThreshold,
 		ReviewRequired:      true,
 		NonExecuting:        true,
@@ -106,6 +119,8 @@ func ObserveTypedDecisionSignal(input TypedDecisionSignalInput) TypedDecisionSig
 	case math.IsNaN(input.Confidence) || math.IsInf(input.Confidence, 0) ||
 		input.Confidence < 0 || input.Confidence > 1:
 		receipt.FirstMismatch = "confidence"
+	case !validTypedDecisionConfidenceMethod(confidenceMethod):
+		receipt.FirstMismatch = "confidence-method"
 	case math.IsNaN(input.AcceptanceThreshold) || math.IsInf(input.AcceptanceThreshold, 0) ||
 		input.AcceptanceThreshold < 0 || input.AcceptanceThreshold > 1:
 		receipt.FirstMismatch = "acceptance-threshold"
@@ -181,10 +196,24 @@ func (receipt TypedDecisionSignalReceipt) Validate() error {
 		math.IsInf(receipt.AcceptanceThreshold, 0) ||
 		receipt.SelectedProbability < 0 || receipt.SelectedProbability > 1 ||
 		receipt.Confidence < 0 || receipt.Confidence > 1 ||
+		!validTypedDecisionConfidenceMethod(receipt.ConfidenceMethod) ||
 		receipt.AcceptanceThreshold < 0 || receipt.AcceptanceThreshold > 1 {
 		return fmt.Errorf("bound typed decision signal is incomplete")
 	}
 	return nil
+}
+
+func validTypedDecisionConfidenceMethod(method string) bool {
+	switch method {
+	case TypedDecisionConfidenceMethodUnspecified,
+		TypedDecisionConfidenceMethodCalibrated,
+		TypedDecisionConfidenceMethodMaxProbability,
+		TypedDecisionConfidenceMethodTopTwoMargin,
+		TypedDecisionConfidenceMethodOneMinusEntropy:
+		return true
+	default:
+		return false
+	}
 }
 
 func validTypedDecisionQuestionKind(kind string) bool {
@@ -215,7 +244,7 @@ func typedDecisionProbabilityDigest(probabilities map[string]float64) string {
 
 func typedDecisionSignalEvidenceDigest(receipt TypedDecisionSignalReceipt) string {
 	return typedDecisionHash(fmt.Sprintf(
-		"jev-typed-decision-signal|%s|%s|%s|%s|%s|%s|%s|%s|%d|%0.9f|%0.9f|%0.9f|%t|%t|%s|%t|%t|%t|%t",
+		"jev-typed-decision-signal|%s|%s|%s|%s|%s|%s|%s|%s|%d|%0.9f|%0.9f|%s|%0.9f|%t|%t|%s|%t|%t|%t|%t",
 		receipt.Status,
 		receipt.SourceVersion,
 		receipt.ContractVersion,
@@ -227,6 +256,7 @@ func typedDecisionSignalEvidenceDigest(receipt TypedDecisionSignalReceipt) strin
 		receipt.ProbabilityCount,
 		receipt.SelectedProbability,
 		receipt.Confidence,
+		receipt.ConfidenceMethod,
 		receipt.AcceptanceThreshold,
 		receipt.ThresholdMet,
 		receipt.ReviewRequired,
@@ -242,4 +272,3 @@ func typedDecisionHash(value string) string {
 	sum := sha256.Sum256([]byte(value))
 	return "sha256:" + hex.EncodeToString(sum[:])
 }
-
