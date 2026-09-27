@@ -4,7 +4,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"strings"
 )
 
 type WorkloadCredentialValidityStatus string
@@ -22,18 +21,18 @@ const (
 // WorkloadCredentialValidityInput records time and revocation evidence for a
 // SPIFFE-like credential without making an authentication decision.
 type WorkloadCredentialValidityInput struct {
-	SourceVersion       string
-	ContractVersion     string
-	WorkloadSpiffeID    string
-	IssuerSpiffeID      string
-	Audience            string
-	CredentialDigest    string
+	SourceVersion        string
+	ContractVersion      string
+	WorkloadSpiffeID     string
+	IssuerSpiffeID       string
+	Audience             string
+	CredentialDigest     string
 	EvidencePrefixDigest string
-	IssuedAtUnix        int64
-	ExpiresAtUnix       int64
-	ObservedAtUnix      int64
-	RevocationStatus    string
-	ProducerDeferred    bool
+	IssuedAtUnix         int64
+	ExpiresAtUnix        int64
+	ObservedAtUnix       int64
+	RevocationStatus     string
+	ProducerDeferred     bool
 }
 
 // WorkloadCredentialValidityObservation is a read-only temporal evidence
@@ -203,7 +202,7 @@ func (observation WorkloadCredentialValidityObservation) Validate() error {
 
 func workloadCredentialValidityDigest(observation WorkloadCredentialValidityObservation) string {
 	sum := sha256.Sum256([]byte(fmt.Sprintf(
-		"%s|%s|%s|%s|%s|%s|%s|%d|%d|%d|%s|%s|%s|%s|%t|%t|%t",
+		"%s|%s|%s|%s|%s|%s|%s|%d|%d|%d|%s|%s|%s|%s|%s|%s|%t|%t|%t",
 		observation.Status,
 		observation.SourceVersion,
 		observation.ContractVersion,
@@ -226,6 +225,3 @@ func workloadCredentialValidityDigest(observation WorkloadCredentialValidityObse
 	)))
 	return fmt.Sprintf("sha256:%s", hex.EncodeToString(sum[:]))
 }
-
-// Keep strings linked to this package's security validation surface.
-var _ = strings.HasPrefix
