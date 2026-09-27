@@ -34,20 +34,20 @@ type CapabilityDiscoveryMatch struct {
 // CapabilityDiscoveryObservation explains what this runtime can recognize
 // without claiming that a recognized capability is executable or authorized.
 type CapabilityDiscoveryObservation struct {
-	Status             CapabilityDiscoveryStatus
-	SourceVersion      string
-	ContractVersion    string
-	Query              string
-	Matches            []CapabilityDiscoveryMatch
-	Suggestions        []string
-	FirstMismatch      string
-	MissingStage       string
-	TargetStage        string
-	Reason             string
-	DiscoveryDigest    string
-	IsReadOnly         bool
-	CanExecute         bool
-	CanAuthorize       bool
+	Status          CapabilityDiscoveryStatus
+	SourceVersion   string
+	ContractVersion string
+	Query           string
+	Matches         []CapabilityDiscoveryMatch
+	Suggestions     []string
+	FirstMismatch   string
+	MissingStage    string
+	TargetStage     string
+	Reason          string
+	DiscoveryDigest string
+	IsReadOnly      bool
+	CanExecute      bool
+	CanAuthorize    bool
 }
 
 type capabilityCatalogEntry struct {
@@ -191,7 +191,7 @@ func hasDeferredMatch(matches []CapabilityDiscoveryMatch) bool {
 }
 
 func isOverviewQuery(query string) bool {
-	for _, phrase := range []string{"what can", "capabilities", "show examples", "discover", "help", "gooo", "무엇을", "가능", "할 수"} {
+	for _, phrase := range []string{"what can", "capabilities", "show examples", "discover", "help", "무엇을", "가능", "할 수"} {
 		if strings.Contains(query, phrase) {
 			return true
 		}
