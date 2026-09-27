@@ -96,6 +96,8 @@ func ObserveGenerationTraceOutcomeClosure(input GenerationTraceOutcomeClosureInp
 		return output
 	}
 
+	output.SourceVersion = input.Trace.SourceVersion
+	output.ContractVersion = input.Trace.ContractVersion
 	output.TraceObservationDigest = input.Trace.ObservationDigest
 	output.TraceMetricDigest = input.Trace.MetricDigest
 	output.RouteOutcomeMetricDigest = input.RouteOutcome.MetricDigest
