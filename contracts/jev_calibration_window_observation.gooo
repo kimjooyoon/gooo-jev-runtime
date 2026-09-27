@@ -15,6 +15,7 @@ field evidence_coverage
 field minimum_window
 field first_mismatch
 field missing_stage
+field evidence_prefix_digest
 field evidence_digest
 
 constraint observation_only
