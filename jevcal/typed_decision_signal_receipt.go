@@ -55,6 +55,7 @@ type TypedDecisionSignalReceipt struct {
 	ProbabilityCount    int
 	SelectedProbability float64
 	Confidence          float64
+	ConfidenceMethod    string
 	AcceptanceThreshold float64
 	ThresholdMet        bool
 	ReviewRequired      bool
