@@ -1,0 +1,29 @@
+module jev_capability_discovery_observation
+
+input source_version
+input contract_version
+input query
+input declaration_source
+
+status BOUND query matches read-only language capabilities
+status DEFERRED query reaches an execution or authorization boundary
+status UNKNOWN query, identity, or catalog evidence is unresolved
+
+field matches
+field suggestions
+field first_mismatch
+field missing_stage
+field target_stage
+field reason
+field discovery_digest
+field declaration_source_digest
+field declaration_observed_signals
+field declaration_bound
+
+constraint observation_only
+constraint no_execution
+constraint no_authorization
+constraint read_only
+constraint no_edits
+constraint no_command
+constraint declaration_source_bound_only

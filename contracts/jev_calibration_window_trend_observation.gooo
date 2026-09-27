@@ -1,0 +1,32 @@
+module jev_calibration_window_trend_observation
+
+input previous_window
+input current_window
+input compared_at
+
+status BOUND stable evidence lineage with measured error delta
+status UNKNOWN invalid window, changed evidence prefix, or missing comparison time
+
+field status
+field previous_evidence_digest
+field current_evidence_digest
+field previous_mean_error
+field current_mean_error
+field mean_error_delta
+field previous_coverage
+field current_coverage
+field coverage_delta
+field previous_unknown_count
+field current_unknown_count
+field direction
+field compared_at
+field first_mismatch
+field missing_stage
+field evidence_digest
+
+constraint measurement_only
+constraint no_improvement_claim
+constraint read_only
+constraint no_execution
+constraint no_authorization
+
