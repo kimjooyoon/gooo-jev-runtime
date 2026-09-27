@@ -1,0 +1,30 @@
+module jev_generation_trace_route_outcome_closure
+
+input generation_trace_observation
+input route_outcome_metric
+input trace_metric_digest
+input route_outcome_metric_digest
+input route_record_digest
+input decision_digest
+input outcome_digest
+input read_only
+input non_authorizing
+
+status BOUND generation trace and route outcome metric are linked
+status DEFERRED generation trace or route outcome producer is deferred
+status UNKNOWN missing, invalid, or unlinked evidence is preserved
+
+field missing_stage
+field target_stage
+field reason
+field closure_signal
+field closure_digest
+
+constraint metric_link_required
+constraint observation_only
+constraint no_improvement_claim
+constraint no_execution
+constraint no_authorization
+constraint read_only
+constraint no_edits
+constraint no_command
