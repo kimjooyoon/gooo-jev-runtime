@@ -79,3 +79,32 @@ func TestDiscoverCapabilitiesRejectsTamperedDigest(t *testing.T) {
 		t.Fatal("tampered capability discovery should fail validation")
 	}
 }
+
+func TestDiscoverCapabilitiesBindsDeclarationObservation(t *testing.T) {
+	observation := DiscoverCapabilitiesForDeclaration(CapabilityDiscoveryInput{
+		SourceVersion:   "gooo-source-v1",
+		ContractVersion: "jev-capability-discovery-v1",
+		Query:           "What can gooo do with this declaration?",
+	}, "entity Usage\noperation observe\n")
+	if !observation.DeclarationBound || observation.DeclarationSourceDigest == "" {
+		t.Fatalf("declaration source was not bound: %+v", observation)
+	}
+	if len(observation.DeclarationObservedSignals) != 2 || observation.DeclarationObservedSignals[0] != "entity" || observation.DeclarationObservedSignals[1] != "operation" {
+		t.Fatalf("unexpected declaration signals: %+v", observation.DeclarationObservedSignals)
+	}
+	if err := observation.Validate(); err != nil {
+		t.Fatalf("declaration-bound observation should validate: %v", err)
+	}
+}
+
+func TestDiscoverCapabilitiesRejectsTamperedDeclarationBinding(t *testing.T) {
+	observation := DiscoverCapabilitiesForDeclaration(CapabilityDiscoveryInput{
+		SourceVersion:   "gooo-source-v1",
+		ContractVersion: "jev-capability-discovery-v1",
+		Query:           "show provenance",
+	}, "entity Usage")
+	observation.DeclarationSourceDigest = "sha256:tampered"
+	if err := observation.Validate(); err == nil {
+		t.Fatal("tampered declaration binding should fail validation")
+	}
+}

@@ -12,6 +12,7 @@ type request struct {
 	SourceVersion   string `json:"source_version"`
 	ContractVersion string `json:"contract_version"`
 	Query           string `json:"query"`
+	Declaration     string `json:"declaration,omitempty"`
 }
 
 type matchJSON struct {
@@ -33,6 +34,9 @@ type discoveryJSON struct {
 	TargetStage     string      `json:"target_stage"`
 	Reason          string      `json:"reason"`
 	DiscoveryDigest string      `json:"discovery_digest"`
+	DeclarationSourceDigest    string   `json:"declaration_source_digest,omitempty"`
+	DeclarationObservedSignals []string `json:"declaration_observed_signals,omitempty"`
+	DeclarationBound            bool     `json:"declaration_bound"`
 	IsReadOnly      bool        `json:"is_read_only"`
 	CanExecute      bool        `json:"can_execute"`
 	CanAuthorize    bool        `json:"can_authorize"`
@@ -55,6 +59,9 @@ func render(observation jevcal.CapabilityDiscoveryObservation) discoveryJSON {
 		TargetStage:     observation.TargetStage,
 		Reason:          observation.Reason,
 		DiscoveryDigest: observation.DiscoveryDigest,
+		DeclarationSourceDigest:    observation.DeclarationSourceDigest,
+		DeclarationObservedSignals: observation.DeclarationObservedSignals,
+		DeclarationBound:            observation.DeclarationBound,
 		IsReadOnly:      observation.IsReadOnly,
 		CanExecute:      observation.CanExecute,
 		CanAuthorize:    observation.CanAuthorize,
@@ -67,9 +74,15 @@ func main() {
 		fmt.Fprintf(os.Stderr, "read capability discovery request: %v\n", err)
 		os.Exit(64)
 	}
-	observation := jevcal.DiscoverCapabilities(jevcal.CapabilityDiscoveryInput{
+	discoveryInput := jevcal.CapabilityDiscoveryInput{
 		SourceVersion: input.SourceVersion, ContractVersion: input.ContractVersion, Query: input.Query,
-	})
+	}
+	var observation jevcal.CapabilityDiscoveryObservation
+	if input.Declaration != "" {
+		observation = jevcal.DiscoverCapabilitiesForDeclaration(discoveryInput, input.Declaration)
+	} else {
+		observation = jevcal.DiscoverCapabilities(discoveryInput)
+	}
 	if err := observation.Validate(); err != nil {
 		fmt.Fprintf(os.Stderr, "invalid capability discovery observation: %v\n", err)
 		os.Exit(1)

@@ -40,6 +40,9 @@ type CapabilityDiscoveryObservation struct {
 	SourceVersion   string
 	ContractVersion string
 	Query           string
+	DeclarationSourceDigest    string
+	DeclarationObservedSignals []string
+	DeclarationBound            bool
 	Matches         []CapabilityDiscoveryMatch
 	Suggestions      []string
 	SuggestedQueries []string
@@ -147,6 +150,61 @@ func DiscoverCapabilities(input CapabilityDiscoveryInput) CapabilityDiscoveryObs
 	return observation
 }
 
+// DiscoverCapabilitiesForDeclaration binds capability discovery to the
+// supplied declaration bytes without treating the declaration as executable
+// or authoritative. The observed signals are intentionally structural.
+func DiscoverCapabilitiesForDeclaration(input CapabilityDiscoveryInput, declaration string) CapabilityDiscoveryObservation {
+	observation := DiscoverCapabilities(input)
+	raw := strings.TrimSpace(declaration)
+	if raw != "" {
+		observation.DeclarationBound = true
+		observation.DeclarationSourceDigest = capabilityDeclarationDigest(raw)
+		observation.DeclarationObservedSignals = capabilityDeclarationSignals(raw)
+	}
+	observation.DiscoveryDigest = capabilityDiscoveryDigest(observation)
+	return observation
+}
+
+func capabilityDeclarationSignals(declaration string) []string {
+	signals := make([]string, 0)
+	for _, line := range strings.Split(declaration, "\n") {
+		normalized := strings.ToLower(strings.TrimSpace(line))
+		for _, candidate := range []struct {
+			prefix string
+			id     string
+		}{
+			{prefix: "entity ", id: "entity"},
+			{prefix: "operation ", id: "operation"},
+			{prefix: "observe ", id: "observe"},
+			{prefix: "transform ", id: "transform"},
+			{prefix: "contract ", id: "contract"},
+			{prefix: "policy ", id: "policy"},
+			{prefix: "workflow ", id: "workflow"},
+		} {
+			if !strings.HasPrefix(normalized, candidate.prefix) || containsString(signals, candidate.id) {
+				continue
+			}
+			signals = append(signals, candidate.id)
+		}
+	}
+	sort.Strings(signals)
+	return signals
+}
+
+func containsString(values []string, expected string) bool {
+	for _, value := range values {
+		if value == expected {
+			return true
+		}
+	}
+	return false
+}
+
+func capabilityDeclarationDigest(declaration string) string {
+	digest := sha256.Sum256([]byte("jev-capability-declaration|" + declaration))
+	return "sha256:" + hex.EncodeToString(digest[:])
+}
+
 func discoverMatches(query string) []CapabilityDiscoveryMatch {
 	normalized := strings.ToLower(strings.TrimSpace(query))
 	matches := make([]CapabilityDiscoveryMatch, 0)
@@ -243,6 +301,17 @@ func (observation CapabilityDiscoveryObservation) Validate() error {
 	if len(observation.SuggestedQueries) == 0 {
 		return fmt.Errorf("capability discovery has no natural-language follow-up suggestions")
 	}
+	if observation.DeclarationBound != (strings.TrimSpace(observation.DeclarationSourceDigest) != "") {
+		return fmt.Errorf("capability declaration binding is incomplete")
+	}
+	if observation.DeclarationSourceDigest != "" && !capabilityFeedbackDigestValid(observation.DeclarationSourceDigest) {
+		return fmt.Errorf("capability declaration source digest is invalid")
+	}
+	for index, signal := range observation.DeclarationObservedSignals {
+		if strings.TrimSpace(signal) == "" || (index > 0 && observation.DeclarationObservedSignals[index-1] >= signal) {
+			return fmt.Errorf("capability declaration signals are not sorted and unique")
+		}
+	}
 	if observation.Status == CapabilityDiscoveryBound && (len(observation.Matches) == 0 || observation.FirstMismatch != "" || observation.MissingStage != "") {
 		return fmt.Errorf("bound capability discovery is incomplete")
 	}
@@ -272,6 +341,10 @@ func capabilityDiscoveryDigest(observation CapabilityDiscoveryObservation) strin
 	}
 	parts = append(parts, observation.Suggestions...)
 	parts = append(parts, observation.SuggestedQueries...)
+	if observation.DeclarationBound {
+		parts = append(parts, "declaration", observation.DeclarationSourceDigest)
+		parts = append(parts, observation.DeclarationObservedSignals...)
+	}
 	digest := sha256.Sum256([]byte(strings.Join(parts, "|")))
 	return "sha256:" + hex.EncodeToString(digest[:])
 }
