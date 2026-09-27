@@ -1,0 +1,36 @@
+contract jev_runtime {
+  input choice_set: ordered<choice{id:string, probability:float64}>
+  input outcomes: sequence<outcome{choice_id:string, observed:bool}>
+  input evidence: evidence{
+    source_digest:string
+    observation_digest:string
+    prefix_digest:string
+    complete:bool
+  }
+  input baseline_score:float64
+  input current_score:float64
+
+  derive choice_set_digest = digest(choice_set)
+  derive evidence_digest = digest(
+    evidence.source_digest,
+    evidence.observation_digest,
+    evidence.prefix_digest
+  )
+
+  decide calibration {
+    when evidence.complete == false -> UNKNOWN("incomplete-evidence")
+    when choice_set_digest.changed -> DEFERRED("choice-set-or-order-changed")
+    when current_score < baseline_score -> CONVERGED("score-improved")
+    when current_score > baseline_score -> REGRESSED("score-regressed")
+    otherwise -> DEFERRED("score-flat")
+  }
+
+  preserve provenance {
+    source_digest
+    observation_digest
+    prefix_digest
+    choice_set_digest
+    evidence_digest
+    first_missing_stage
+  }
+}
