@@ -1,0 +1,30 @@
+module jev_provenance_stage_coverage_observation
+
+input source_version
+input contract_version
+input expected_stages
+input observed_stages
+input source_digest
+input ir_digest
+input generated_digest
+input reverse_observation_digest
+input producer_deferred
+
+status BOUND all expected provenance stages are observed and digested
+status DEFERRED provenance stage producer is deferred
+status UNKNOWN missing identity, expected stage, observed stage, or stage digest
+
+field coverage_numerator
+field coverage_denominator
+field coverage_percent
+field missing_stage
+field target_stage
+field observation_digest
+
+constraint observation_only
+constraint no_improvement_claim
+constraint no_execution
+constraint no_authorization
+constraint read_only
+constraint no_edits
+constraint no_command
