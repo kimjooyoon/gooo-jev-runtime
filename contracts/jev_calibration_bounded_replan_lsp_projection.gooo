@@ -1,0 +1,17 @@
+module jev_calibration_bounded_replan_lsp_projection
+
+input replan_candidate
+projection lsp_diagnostic
+
+status PROPOSED as read_only_inspection
+status NO_ACTION as informational
+status DEFERRED as producer_state_inspection
+status UNKNOWN as provenance_inspection
+
+field target_stage
+field plan_digest
+
+constraint no_edits
+constraint no_command
+constraint no_execution
+constraint no_authorization
