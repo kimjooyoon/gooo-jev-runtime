@@ -11,6 +11,7 @@ status UNKNOWN query, identity, or catalog evidence is unresolved
 
 field matches
 field suggestions
+field suggested_queries
 field first_mismatch
 field missing_stage
 field target_stage

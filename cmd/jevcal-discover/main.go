@@ -16,55 +16,66 @@ type request struct {
 }
 
 type matchJSON struct {
-	Key     string `json:"key"`
-	Summary string `json:"summary"`
-	Stage   string `json:"stage"`
-	Status  string `json:"status"`
+	Key           string `json:"key"`
+	Summary       string `json:"summary"`
+	ExampleQuery  string `json:"example_query"`
+	NextOperation string `json:"next_operation"`
+	Stage         string `json:"stage"`
+	Status        string `json:"status"`
 }
 
 type discoveryJSON struct {
-	Status          string      `json:"status"`
-	SourceVersion   string      `json:"source_version"`
-	ContractVersion string      `json:"contract_version"`
-	Query           string      `json:"query"`
-	Matches         []matchJSON `json:"matches"`
-	Suggestions     []string    `json:"suggestions"`
-	FirstMismatch   string      `json:"first_mismatch"`
-	MissingStage    string      `json:"missing_stage"`
-	TargetStage     string      `json:"target_stage"`
-	Reason          string      `json:"reason"`
-	DiscoveryDigest string      `json:"discovery_digest"`
-	DeclarationSourceDigest    string   `json:"declaration_source_digest,omitempty"`
-	DeclarationObservedSignals []string `json:"declaration_observed_signals,omitempty"`
-	DeclarationBound            bool     `json:"declaration_bound"`
-	IsReadOnly      bool        `json:"is_read_only"`
-	CanExecute      bool        `json:"can_execute"`
-	CanAuthorize    bool        `json:"can_authorize"`
+	Status                     string      `json:"status"`
+	SourceVersion              string      `json:"source_version"`
+	ContractVersion            string      `json:"contract_version"`
+	Query                      string      `json:"query"`
+	Matches                    []matchJSON `json:"matches"`
+	Suggestions                []string    `json:"suggestions"`
+	SuggestedQueries           []string    `json:"suggested_queries"`
+	FirstMismatch              string      `json:"first_mismatch"`
+	MissingStage               string      `json:"missing_stage"`
+	TargetStage                string      `json:"target_stage"`
+	Reason                     string      `json:"reason"`
+	DiscoveryDigest             string      `json:"discovery_digest"`
+	DeclarationSourceDigest    string      `json:"declaration_source_digest,omitempty"`
+	DeclarationObservedSignals []string    `json:"declaration_observed_signals,omitempty"`
+	DeclarationBound            bool        `json:"declaration_bound"`
+	IsReadOnly                 bool        `json:"is_read_only"`
+	CanExecute                 bool        `json:"can_execute"`
+	CanAuthorize               bool        `json:"can_authorize"`
 }
 
 func render(observation jevcal.CapabilityDiscoveryObservation) discoveryJSON {
 	matches := make([]matchJSON, 0, len(observation.Matches))
 	for _, match := range observation.Matches {
-		matches = append(matches, matchJSON{Key: match.Key, Summary: match.Summary, Stage: match.Stage, Status: string(match.Status)})
+		matches = append(matches, matchJSON{
+			Key:           match.Key,
+			Summary:       match.Summary,
+			ExampleQuery:  match.ExampleQuery,
+			NextOperation: match.NextOperation,
+			Stage:         match.Stage,
+			Status:        string(match.Status),
+		})
 	}
 	return discoveryJSON{
-		Status:          string(observation.Status),
-		SourceVersion:   observation.SourceVersion,
-		ContractVersion: observation.ContractVersion,
-		Query:           observation.Query,
-		Matches:         matches,
-		Suggestions:     observation.Suggestions,
-		FirstMismatch:   observation.FirstMismatch,
-		MissingStage:    observation.MissingStage,
-		TargetStage:     observation.TargetStage,
-		Reason:          observation.Reason,
-		DiscoveryDigest: observation.DiscoveryDigest,
+		Status:                     string(observation.Status),
+		SourceVersion:              observation.SourceVersion,
+		ContractVersion:            observation.ContractVersion,
+		Query:                      observation.Query,
+		Matches:                    matches,
+		Suggestions:                observation.Suggestions,
+		SuggestedQueries:           observation.SuggestedQueries,
+		FirstMismatch:              observation.FirstMismatch,
+		MissingStage:               observation.MissingStage,
+		TargetStage:                observation.TargetStage,
+		Reason:                     observation.Reason,
+		DiscoveryDigest:            observation.DiscoveryDigest,
 		DeclarationSourceDigest:    observation.DeclarationSourceDigest,
 		DeclarationObservedSignals: observation.DeclarationObservedSignals,
-		DeclarationBound:            observation.DeclarationBound,
-		IsReadOnly:      observation.IsReadOnly,
-		CanExecute:      observation.CanExecute,
-		CanAuthorize:    observation.CanAuthorize,
+		DeclarationBound:           observation.DeclarationBound,
+		IsReadOnly:                 observation.IsReadOnly,
+		CanExecute:                 observation.CanExecute,
+		CanAuthorize:               observation.CanAuthorize,
 	}
 }
 
@@ -75,7 +86,9 @@ func main() {
 		os.Exit(64)
 	}
 	discoveryInput := jevcal.CapabilityDiscoveryInput{
-		SourceVersion: input.SourceVersion, ContractVersion: input.ContractVersion, Query: input.Query,
+		SourceVersion:   input.SourceVersion,
+		ContractVersion: input.ContractVersion,
+		Query:           input.Query,
 	}
 	var observation jevcal.CapabilityDiscoveryObservation
 	if input.Declaration != "" {
