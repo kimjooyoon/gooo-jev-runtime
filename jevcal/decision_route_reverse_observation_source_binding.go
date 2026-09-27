@@ -26,17 +26,17 @@ type DecisionRouteReverseObservationSourceInput struct {
 // DecisionRouteReverseObservationSourceBinding is a read-only source binding.
 // It records the first unresolved stage and never judges the route outcome.
 type DecisionRouteReverseObservationSourceBinding struct {
-	Status           DecisionRouteReverseObservationStatus
-	SourceVersion    string
-	ContractVersion  string
-	SourceDigest     string
+	Status            DecisionRouteReverseObservationStatus
+	SourceVersion     string
+	ContractVersion   string
+	SourceDigest      string
 	ObservationDigest string
-	BindingDigest    string
-	FirstMismatch    string
-	TargetStage      string
-	NonExecuting     bool
-	NonAuthorizing   bool
-	IsReadOnly       bool
+	BindingDigest     string
+	FirstMismatch     string
+	TargetStage       string
+	NonExecuting      bool
+	NonAuthorizing    bool
+	IsReadOnly        bool
 }
 
 // BindDecisionRouteReverseObservationFromSource binds exact source text and
@@ -83,6 +83,14 @@ func BindDecisionRouteReverseObservationFromSource(input DecisionRouteReverseObs
 		}
 	}
 
+	if binding.ObservationDigest == "" {
+		binding.ObservationDigest = decisionRouteReverseLengthDigest(
+			string(binding.Status),
+			binding.SourceDigest,
+			binding.TargetStage,
+			binding.FirstMismatch,
+		)
+	}
 	binding.BindingDigest = decisionRouteReverseBindingDigest(binding)
 	return binding
 }
