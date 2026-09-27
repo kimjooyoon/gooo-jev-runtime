@@ -1,0 +1,30 @@
+module jev_generation_trace_observation
+
+input source_version
+input contract_version
+input contract_name
+input contract_digest
+input ir_digest
+input generated_artifact_digest
+input reverse_observation_digest
+input metric_digest
+input evidence_prefix_digest
+input producer_deferred
+
+status BOUND declaration, IR, generation, reverse observation, and metric evidence are linked
+status DEFERRED generation trace producer is deferred
+status UNKNOWN missing identity, stage, or digest
+
+field missing_stage
+field target_stage
+field reason
+field trace_signal
+field observation_digest
+
+constraint observation_only
+constraint no_improvement_claim
+constraint no_execution
+constraint no_authorization
+constraint read_only
+constraint no_edits
+constraint no_command
