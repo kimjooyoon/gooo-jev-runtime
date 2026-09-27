@@ -1,0 +1,31 @@
+module jev_calibration_decision_route_reverse_observation
+
+input source_version
+input contract_version
+input route_status
+input route_record_digest
+input decision_digest
+input expected_route_status
+input observed_route_status
+input outcome_digest
+input producer_deferred
+
+status BOUND route and outcome evidence are aligned
+status DEFERRED decision route reverse observation producer is deferred
+status UNKNOWN missing or mismatched route and outcome evidence
+
+field expected_route_status
+field observed_route_status
+field outcome_digest
+field target_stage
+field observation_digest
+field review_required
+
+constraint observation_only
+constraint preserve_decision_digest
+constraint no_outcome_judgment
+constraint read_only
+constraint no_execution
+constraint no_authorization
+constraint no_edits
+constraint no_command
