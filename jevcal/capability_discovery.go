@@ -26,9 +26,10 @@ type CapabilityDiscoveryInput struct {
 
 type CapabilityDiscoveryMatch struct {
 	Key     string
-	Summary string
-	Stage   string
-	Status  CapabilityDiscoveryStatus
+	Summary      string
+	ExampleQuery string
+	Stage        string
+	Status       CapabilityDiscoveryStatus
 }
 
 // CapabilityDiscoveryObservation explains what this runtime can recognize
@@ -39,7 +40,8 @@ type CapabilityDiscoveryObservation struct {
 	ContractVersion string
 	Query           string
 	Matches         []CapabilityDiscoveryMatch
-	Suggestions     []string
+	Suggestions      []string
+	SuggestedQueries []string
 	FirstMismatch   string
 	MissingStage    string
 	TargetStage     string
@@ -52,20 +54,21 @@ type CapabilityDiscoveryObservation struct {
 
 type capabilityCatalogEntry struct {
 	Key     string
-	Summary string
-	Stage   string
-	Aliases []string
-	Safe    bool
+	Summary      string
+	ExampleQuery string
+	Stage        string
+	Aliases      []string
+	Safe         bool
 }
 
 var capabilityCatalog = []capabilityCatalogEntry{
-	{Key: "feedback-trend", Summary: "compare feedback and calibration windows with evidence lineage", Stage: "feedback_observation", Aliases: []string{"feedback", "trend", "calibration", "피드백", "추세"}, Safe: true},
-	{Key: "generation", Summary: "produce and inspect generated artifacts with provenance", Stage: "generation_observation", Aliases: []string{"generate", "generation", "codegen", "code generation", "생성", "코드 생성"}, Safe: true},
-	{Key: "provenance", Summary: "trace source, generation, and reverse-observation evidence", Stage: "provenance_observation", Aliases: []string{"provenance", "origin", "reverse observation", "기원", "역관찰"}, Safe: true},
-	{Key: "security-boundary", Summary: "observe workload identity and network capability boundaries", Stage: "security_capability_boundary", Aliases: []string{"security", "spiffe", "workload identity", "network allowlist", "credential", "보안"}, Safe: false},
-	{Key: "support-triage", Summary: "structure support-triage workflows and their next safe observations", Stage: "support_triage_observation", Aliases: []string{"support", "support triage", "triage", "workflow", "지원", "분류"}, Safe: true},
-	{Key: "syntax-completion", Summary: "suggest syntax completions through a read-only language-service path", Stage: "syntax_completion", Aliases: []string{"syntax", "completion", "autocomplete", "lsp", "문법", "완성"}, Safe: true},
-	{Key: "execution-boundary", Summary: "execution or authorization requires an explicit external boundary", Stage: "execution_or_authorization_boundary", Aliases: []string{"execute", "execution", "run", "authorize", "authorization", "permission", "실행", "권한"}, Safe: false},
+	{Key: "feedback-trend", ExampleQuery: "How has gooo feedback changed over time?", Summary: "compare feedback and calibration windows with evidence lineage", Stage: "feedback_observation", Aliases: []string{"feedback", "trend", "calibration", "피드백", "추세"}, Safe: true},
+	{Key: "generation", ExampleQuery: "How do I generate a canonical .gooo declaration?", Summary: "produce and inspect generated artifacts with provenance", Stage: "generation_observation", Aliases: []string{"generate", "generation", "codegen", "code generation", "생성", "코드 생성"}, Safe: true},
+	{Key: "provenance", ExampleQuery: "Where did this .gooo declaration come from?", Summary: "trace source, generation, and reverse-observation evidence", Stage: "provenance_observation", Aliases: []string{"provenance", "origin", "reverse observation", "기원", "역관찰"}, Safe: true},
+	{Key: "security-boundary", ExampleQuery: "What external security boundary is required?", Summary: "observe workload identity and network capability boundaries", Stage: "security_capability_boundary", Aliases: []string{"security", "spiffe", "workload identity", "network allowlist", "credential", "보안"}, Safe: false},
+	{Key: "support-triage", ExampleQuery: "How should I triage this gooo support request?", Summary: "structure support-triage workflows and their next safe observations", Stage: "support_triage_observation", Aliases: []string{"support", "support triage", "triage", "workflow", "지원", "분류"}, Safe: true},
+	{Key: "syntax-completion", ExampleQuery: "How do I complete a .gooo declaration?", Summary: "suggest syntax completions through a read-only language-service path", Stage: "syntax_completion", Aliases: []string{"syntax", "completion", "autocomplete", "lsp", "문법", "완성"}, Safe: true},
+	{Key: "execution-boundary", ExampleQuery: "What explicit boundary is needed before execution?", Summary: "execution or authorization requires an explicit external boundary", Stage: "execution_or_authorization_boundary", Aliases: []string{"execute", "execution", "run", "authorize", "authorization", "permission", "실행", "권한"}, Safe: false},
 }
 
 // CapabilityDiscoveryCatalog returns a stable copy of the catalog exposed to
@@ -137,6 +140,7 @@ func DiscoverCapabilities(input CapabilityDiscoveryInput) CapabilityDiscoveryObs
 	}
 
 	observation.Suggestions = capabilitySuggestions(observation.Query, observation.Matches)
+	observation.SuggestedQueries = capabilityExampleSuggestions()
 	observation.DiscoveryDigest = capabilityDiscoveryDigest(observation)
 	return observation
 }
@@ -165,7 +169,7 @@ func discoverMatches(query string) []CapabilityDiscoveryMatch {
 }
 
 func matchForEntry(entry capabilityCatalogEntry) CapabilityDiscoveryMatch {
-	return CapabilityDiscoveryMatch{Key: entry.Key, Summary: entry.Summary, Stage: entry.Stage, Status: catalogStatus(entry)}
+	return CapabilityDiscoveryMatch{Key: entry.Key, Summary: entry.Summary, ExampleQuery: entry.ExampleQuery, Stage: entry.Stage, Status: catalogStatus(entry)}
 }
 
 func uniqueMatches(matches []CapabilityDiscoveryMatch) []CapabilityDiscoveryMatch {
@@ -213,6 +217,17 @@ func capabilitySuggestions(query string, matches []CapabilityDiscoveryMatch) []s
 	return []string{"syntax-completion", "generation", "provenance", "feedback-trend", "support-triage"}
 }
 
+func capabilityExampleSuggestions() []string {
+	suggestions := make([]string, 0)
+	for _, entry := range capabilityCatalog {
+		if entry.Safe && strings.TrimSpace(entry.ExampleQuery) != "" {
+			suggestions = append(suggestions, entry.ExampleQuery)
+		}
+	}
+	sort.Strings(suggestions)
+	return suggestions
+}
+
 func (observation CapabilityDiscoveryObservation) Validate() error {
 	if observation.Status != CapabilityDiscoveryBound && observation.Status != CapabilityDiscoveryDeferred && observation.Status != CapabilityDiscoveryUnknown {
 		return fmt.Errorf("invalid capability discovery status %q", observation.Status)
@@ -222,6 +237,9 @@ func (observation CapabilityDiscoveryObservation) Validate() error {
 	}
 	if !observation.IsReadOnly || observation.CanExecute || observation.CanAuthorize {
 		return fmt.Errorf("capability discovery crossed an execution or authorization boundary")
+	}
+	if len(observation.SuggestedQueries) == 0 {
+		return fmt.Errorf("capability discovery has no natural-language follow-up suggestions")
 	}
 	if observation.Status == CapabilityDiscoveryBound && (len(observation.Matches) == 0 || observation.FirstMismatch != "" || observation.MissingStage != "") {
 		return fmt.Errorf("bound capability discovery is incomplete")
@@ -248,9 +266,10 @@ func capabilityDiscoveryDigest(observation CapabilityDiscoveryObservation) strin
 		observation.Reason,
 	}
 	for _, match := range observation.Matches {
-		parts = append(parts, match.Key, match.Summary, match.Stage, string(match.Status))
+		parts = append(parts, match.Key, match.Summary, match.ExampleQuery, match.Stage, string(match.Status))
 	}
 	parts = append(parts, observation.Suggestions...)
+	parts = append(parts, observation.SuggestedQueries...)
 	digest := sha256.Sum256([]byte(strings.Join(parts, "|")))
 	return "sha256:" + hex.EncodeToString(digest[:])
 }

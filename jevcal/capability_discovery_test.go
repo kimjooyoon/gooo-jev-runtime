@@ -8,11 +8,14 @@ func TestDiscoverCapabilitiesOverviewIsBoundAndReadOnly(t *testing.T) {
 		ContractVersion: "jev-capability-discovery-v1",
 		Query: "What can gooo do?",
 	})
-	if observation.Status != CapabilityDiscoveryBound || len(observation.Matches) != 5 {
+	if observation.Status != CapabilityDiscoveryBound || len(observation.Matches) != 5 || len(observation.SuggestedQueries) == 0 {
 		t.Fatalf("unexpected overview: %+v", observation)
 	}
 	if err := observation.Validate(); err != nil {
 		t.Fatalf("overview should validate: %v", err)
+	}
+	if !hasCapabilityExample(observation.SuggestedQueries, "How do I generate a canonical .gooo declaration?") {
+		t.Fatalf("overview omitted an actionable example query: %+v", observation.SuggestedQueries)
 	}
 }
 
@@ -36,12 +39,21 @@ func TestDiscoverCapabilitiesUnknownRetainsCatalogBoundary(t *testing.T) {
 		ContractVersion: "jev-capability-discovery-v1",
 		Query: "quantum breakfast compiler",
 	})
-	if observation.Status != CapabilityDiscoveryUnknown || observation.FirstMismatch != "query" || observation.MissingStage != "capability_catalog" {
+	if observation.Status != CapabilityDiscoveryUnknown || observation.FirstMismatch != "query" || observation.MissingStage != "capability_catalog" || len(observation.SuggestedQueries) == 0 {
 		t.Fatalf("unexpected unknown observation: %+v", observation)
 	}
 	if err := observation.Validate(); err != nil {
 		t.Fatalf("unknown observation should validate: %v", err)
 	}
+}
+
+func hasCapabilityExample(values []string, expected string) bool {
+	for _, value := range values {
+		if value == expected {
+			return true
+		}
+	}
+	return false
 }
 
 func TestDiscoverCapabilitiesRejectsTamperedDigest(t *testing.T) {
@@ -50,7 +62,7 @@ func TestDiscoverCapabilitiesRejectsTamperedDigest(t *testing.T) {
 		ContractVersion: "jev-capability-discovery-v1",
 		Query: "show syntax completion and provenance",
 	})
-	observation.Matches[0].Summary = "tampered"
+	observation.Matches[0].ExampleQuery = "tampered"
 	if err := observation.Validate(); err == nil {
 		t.Fatal("tampered capability discovery should fail validation")
 	}
