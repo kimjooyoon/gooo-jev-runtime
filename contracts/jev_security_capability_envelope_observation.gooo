@@ -1,0 +1,35 @@
+module jev_security_capability_envelope_observation
+
+input source_version
+input contract_version
+input workload_identity_status
+input evidence_prefix_digest
+input plan_digest
+input network_allowlist_digest
+input requested_capabilities
+input observed_capabilities
+input reverse_observation_status
+input reverse_observation_digest
+input producer_deferred
+
+status BOUND identity, plan, allowlist, capability, and reverse evidence are aligned
+status DEFERRED producer or reverse observation is deferred
+status UNKNOWN missing identity, plan, allowlist, capability, or reverse evidence
+
+field workload_identity_status
+field evidence_prefix_digest
+field plan_digest
+field network_allowlist_digest
+field requested_capabilities
+field observed_capabilities
+field missing_capability
+field target_stage
+field observation_digest
+
+constraint observation_only
+constraint capability_envelope_binding
+constraint no_authorization
+constraint no_execution
+constraint read_only
+constraint no_edits
+constraint no_command
