@@ -55,7 +55,7 @@ func ChoiceSetDigest(choices []Choice) string {
 	for _, c := range choices {
 		b.WriteString(c.ID)
 		b.WriteByte(0)
-		b.WriteString(strconv.FormatFloat(c.Probability, g, 17, 64))
+		b.WriteString(strconv.FormatFloat(c.Probability, 'g', 17, 64))
 		b.WriteByte(0)
 	}
 	sum := sha256.Sum256([]byte(b.String()))
