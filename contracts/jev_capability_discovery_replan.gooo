@@ -1,0 +1,25 @@
+module jev_capability_discovery_replan
+
+input capability_feedback_window
+
+status PROPOSE_NEXT_ITERATION as bounded_next_iteration
+status REVIEW_NO_ACCEPTED_OUTCOME as review_only
+status HOLD_FOR_EVIDENCE as evidence_incomplete
+status UNKNOWN as provenance_incomplete
+
+field window_digest
+field observation_count
+field known_count
+field accepted_count
+field rejected_count
+field disposition
+field next_operation
+field first_mismatch
+field missing_stage
+field evidence_digest
+
+constraint read_only
+constraint no_execution
+constraint no_authorization
+constraint no_edits
+constraint no_command
