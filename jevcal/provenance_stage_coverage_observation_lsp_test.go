@@ -29,7 +29,6 @@ func TestProjectProvenanceStageCoverageLSPBound(t *testing.T) {
 func TestProjectProvenanceStageCoverageLSPPreservesDeferred(t *testing.T) {
 	observation := provenanceStageCoverageLSPTestObservation()
 	observation.Status = ProvenanceStageCoverageDeferred
-	observation.ProducerDeferred = true
 	projection := ProjectProvenanceStageCoverageLSP(observation)
 	if projection.Status != ProvenanceStageCoverageLSPDeferred ||
 		projection.MissingStage != "provenance_stage_producer" || !projection.Publishable {
