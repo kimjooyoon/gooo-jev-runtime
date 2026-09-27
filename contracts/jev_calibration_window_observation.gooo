@@ -1,0 +1,25 @@
+module jev_calibration_window_observation
+
+input typed_decision_calibration_observations
+input minimum_window
+
+status BOUND complete calibration evidence window
+status UNKNOWN missing observation, invalid observation, or insufficient sample window
+
+field status
+field observation_count
+field known_observation_count
+field within_tolerance_count
+field mean_absolute_error
+field evidence_coverage
+field minimum_window
+field first_mismatch
+field missing_stage
+field evidence_digest
+
+constraint observation_only
+constraint calibration_metric_only
+constraint no_improvement_claim
+constraint read_only
+constraint no_execution
+constraint no_authorization
