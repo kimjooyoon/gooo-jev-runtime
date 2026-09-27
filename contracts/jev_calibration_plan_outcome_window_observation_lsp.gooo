@@ -1,0 +1,21 @@
+module jev_calibration_plan_outcome_window_observation_lsp
+
+input status
+input target_stage
+input chain_digest
+input reason
+
+status INFORMATION for BOUND plan-outcome provenance
+status HINT for DEFERRED plan-outcome provenance
+status ERROR for UNKNOWN or missing chain evidence
+
+field code
+field severity
+
+constraint inspection_only
+constraint provenance_projection
+constraint read_only
+constraint no_edits
+constraint no_command
+constraint no_execution
+constraint no_authorization
