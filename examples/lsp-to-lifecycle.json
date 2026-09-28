@@ -1,0 +1,21 @@
+{
+  "lsp_response": {
+    "query_digest": "sha256:query",
+    "status": "NEEDS_INPUT",
+    "candidate_capability_ids": ["gooo.declaration.diff", "gooo.provenance.compare"],
+    "unresolved_terms": ["safe"],
+    "next_question": "Which declared capability should the editor inspect first?",
+    "provenance_digest": "sha256:catalog",
+    "contract_digest": "sha256:lsp-contract"
+  },
+  "lifecycle_record": {
+    "from_stage": "MEASURED",
+    "to_stage": "PROPOSED",
+    "proposal_digest": "sha256:proposal",
+    "review_digest": "",
+    "application_digest": "",
+    "reversal_digest": "",
+    "provenance_digest": "sha256:measurement-provenance"
+  },
+  "boundary": "clarification and review are required before any application evidence can exist"
+}
