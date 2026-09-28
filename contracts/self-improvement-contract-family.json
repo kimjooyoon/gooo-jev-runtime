@@ -1,0 +1,36 @@
+{
+  "schema": "jev.contract-family.v1",
+  "source_digest": "sha256:contract-family-source-placeholder",
+  "contracts": [
+    {
+      "module": "jev_capability_discovery_query",
+      "role": "natural-language query envelope",
+      "runtime_package": "jevcal/query",
+      "boundary": "non_executing_non_authorizing"
+    },
+    {
+      "module": "jev_capability_graph_shortlist",
+      "role": "deterministic capability shortlist",
+      "runtime_package": "jevcal",
+      "boundary": "authorization_precedes_ranking"
+    },
+    {
+      "module": "jev_domain_capability_measurement",
+      "role": "domain observation measurement",
+      "runtime_package": "jevcal",
+      "boundary": "not_semantic_completeness"
+    },
+    {
+      "module": "jev_self_improvement_proposal",
+      "role": "bounded review proposal",
+      "runtime_package": "jevcal/proposal",
+      "boundary": "no_auto_mutation_no_auto_merge"
+    },
+    {
+      "module": "jev_self_improvement_lifecycle",
+      "role": "evidence-bound lifecycle transition",
+      "runtime_package": "jevcal/lifecycle",
+      "boundary": "unknown_cannot_advance_automatically"
+    }
+  ]
+}
