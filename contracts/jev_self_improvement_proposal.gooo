@@ -1,0 +1,27 @@
+module jev_self_improvement_proposal
+input SelfImprovementProposal
+field domain_id string
+field source_capability_ids []string
+field missing_capability_ids []string
+field observed_signals []string
+field proposal string
+field next_question string
+field evidence_digests []string
+field source_digest string
+field contract_digest string
+status PROPOSED observation supports a bounded improvement proposal
+status NEEDS_INPUT proposal requires a read-only clarification
+status UNKNOWN evidence is insufficient to propose a next step
+status REJECTED proposal crosses an execution, authorization, or mutation boundary
+constraint observation_only
+constraint proposal_must_reference_observed_signal
+constraint missing_capability_ids_must_be_explicit
+constraint proposal_is_not_execution
+constraint no_auto_source_mutation
+constraint no_auto_merge
+constraint no_permission_grant
+constraint human_or_policy_review_required
+constraint evidence_digests_bind_observations
+constraint source_digest_binds_source_catalog
+constraint contract_digest_binds_this_contract
+constraint next_question_must_be_read_only
