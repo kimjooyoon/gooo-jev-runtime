@@ -1,0 +1,23 @@
+module jev_capability_discovery_query
+input CapabilityDiscoveryQuery
+field query_text string
+field normalized_terms []string
+field candidate_capability_ids []string
+field unresolved_terms []string
+field next_question string
+field query_digest string
+field provenance_digest string
+status UNKNOWN query cannot yet be bound to a declared capability
+status DEFERRED query has candidates but requires an explicit next question
+status BOUND query is bound to one or more declared capabilities without execution
+status NEEDS_INPUT query is ambiguous and requires user clarification
+constraint non_executing
+constraint non_authorizing
+constraint deterministic_term_normalization
+constraint candidate_ids_must_be_declared
+constraint unresolved_terms_must_be_explicit
+constraint next_question_must_be_read_only
+constraint query_digest_binds_query_text_and_normalized_terms
+constraint provenance_digest_binds_source_and_contract_identity
+constraint no_permission_grant
+constraint no_execution_plan
