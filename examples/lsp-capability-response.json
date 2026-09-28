@@ -1,0 +1,9 @@
+{
+  "query_digest": "sha256:query",
+  "status": "NEEDS_INPUT",
+  "candidate_capability_ids": ["gooo.declaration.diff", "gooo.provenance.compare"],
+  "unresolved_terms": ["safe"],
+  "next_question": "Which declared capability should the editor inspect first?",
+  "provenance_digest": "sha256:catalog",
+  "contract_digest": "sha256:lsp-contract"
+}
