@@ -1,0 +1,38 @@
+module jev_capability_graph_shortlist
+
+input source_version
+input contract_version
+input natural_language_query
+input candidate_capabilities
+input eligible_capabilities
+input prerequisite_observations
+input authorization_evidence
+input ranking_evidence
+input selected_capability
+input next_question
+input provenance_digest
+
+status UNKNOWN capability graph or source identity is unresolved
+status DEFERRED capability is known but prerequisites or authorization are incomplete
+status ELIGIBLE deterministic graph has produced an authorized candidate shortlist
+status RANKED Jev has ranked only the eligible candidate shortlist
+status NEEDS_INPUT a safe next question is required before ranking or execution
+
+field candidate_capabilities
+field eligible_capabilities
+field prerequisite_observations
+field authorization_evidence
+field ranking_evidence
+field selected_capability
+field next_question
+field provenance_digest
+
+constraint deterministic_graph_first
+constraint authorization_precedes_ranking
+constraint rank_only_eligible_capabilities
+constraint no_execution
+constraint no_mutation
+constraint no_permission_grant
+constraint provenance_bound
+constraint unknown_and_deferred_preserve_first_boundary
+constraint next_question_is_read_only
