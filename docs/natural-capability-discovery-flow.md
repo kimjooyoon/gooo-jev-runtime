@@ -21,3 +21,6 @@ Each response binds the query digest and provenance digest to the source catalog
 ## Non-goals
 
 This flow does not execute tools, mutate data, issue credentials, infer semantic completeness, or convert a metric into an authorization decision.
+## Evidence returned for a natural query
+
+A capability response also returns deterministic `normalized_terms` and `matched_terms`, a `query_digest`, and a `provenance_digest`. The query digest binds the original question to its normalized lexical terms. The provenance digest binds the source identity, contract identity, catalog contents, and optional declaration source digest. These are observation evidence only; they do not claim that a capability is executable, authorized, or semantically complete.

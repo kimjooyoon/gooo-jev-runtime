@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"unicode"
 )
 
 type CapabilityDiscoveryStatus string
@@ -40,6 +41,10 @@ type CapabilityDiscoveryObservation struct {
 	SourceVersion   string
 	ContractVersion string
 	Query           string
+	NormalizedTerms []string
+	MatchedTerms []string
+	QueryDigest string
+	ProvenanceDigest string
 	DeclarationSourceDigest    string
 	DeclarationObservedSignals []string
 	DeclarationBound            bool
@@ -107,6 +112,8 @@ func DiscoverCapabilities(input CapabilityDiscoveryInput) CapabilityDiscoveryObs
 		SourceVersion:   input.SourceVersion,
 		ContractVersion: input.ContractVersion,
 		Query:           strings.TrimSpace(input.Query),
+		NormalizedTerms: normalizeCapabilityTerms(input.Query),
+		QueryDigest: capabilityQueryDigest(strings.TrimSpace(input.Query), normalizeCapabilityTerms(input.Query)),
 		TargetStage:     "capability_discovery",
 		Reason:          "query did not resolve to a known capability",
 		IsReadOnly:      true,
@@ -126,7 +133,7 @@ func DiscoverCapabilities(input CapabilityDiscoveryInput) CapabilityDiscoveryObs
 		observation.MissingStage = "capability_query"
 		observation.Reason = "a natural-language capability query is required"
 	default:
-		observation.Matches = discoverMatches(observation.Query)
+		observation.Matches, observation.MatchedTerms = discoverMatchesWithTerms(observation.Query)
 		if len(observation.Matches) == 0 {
 			observation.FirstMismatch = "query"
 			observation.MissingStage = "capability_catalog"
@@ -146,6 +153,7 @@ func DiscoverCapabilities(input CapabilityDiscoveryInput) CapabilityDiscoveryObs
 
 	observation.Suggestions = capabilitySuggestions(observation.Query, observation.Matches)
 	observation.SuggestedQueries = capabilityExampleSuggestions()
+	observation.ProvenanceDigest = capabilityProvenanceDigest(observation.SourceVersion, observation.ContractVersion, observation.DeclarationSourceDigest)
 	observation.DiscoveryDigest = capabilityDiscoveryDigest(observation)
 	return observation
 }
@@ -161,6 +169,7 @@ func DiscoverCapabilitiesForDeclaration(input CapabilityDiscoveryInput, declarat
 		observation.DeclarationSourceDigest = capabilityDeclarationDigest(raw)
 		observation.DeclarationObservedSignals = capabilityDeclarationSignals(raw)
 	}
+	observation.ProvenanceDigest = capabilityProvenanceDigest(observation.SourceVersion, observation.ContractVersion, observation.DeclarationSourceDigest)
 	observation.DiscoveryDigest = capabilityDiscoveryDigest(observation)
 	return observation
 }
@@ -226,6 +235,90 @@ func discoverMatches(query string) []CapabilityDiscoveryMatch {
 	}
 	sort.Slice(matches, func(i, j int) bool { return matches[i].Key < matches[j].Key })
 	return uniqueMatches(matches)
+}
+
+func discoverMatchesWithTerms(query string) ([]CapabilityDiscoveryMatch, []string) {
+	matches := discoverMatches(query)
+	normalized := strings.ToLower(strings.TrimSpace(query))
+	terms := make([]string, 0)
+	if isOverviewQuery(normalized) {
+		terms = append(terms, "overview")
+	} else {
+		for _, entry := range capabilityCatalog {
+			for _, alias := range entry.Aliases {
+				if strings.Contains(normalized, strings.ToLower(alias)) {
+					terms = append(terms, strings.ToLower(alias))
+				}
+			}
+		}
+	}
+	return matches, sortedUniqueStrings(terms)
+}
+
+func normalizeCapabilityTerms(query string) []string {
+	fields := strings.FieldsFunc(strings.ToLower(strings.TrimSpace(query)), func(r rune) bool {
+		return !unicode.IsLetter(r) && !unicode.IsDigit(r)
+	})
+	return sortedUniqueStrings(fields)
+}
+
+func sortedUniqueStrings(values []string) []string {
+	seen := make(map[string]struct{}, len(values))
+	out := make([]string, 0, len(values))
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		if value == "" {
+			continue
+		}
+		if _, ok := seen[value]; ok {
+			continue
+		}
+		seen[value] = struct{}{}
+		out = append(out, value)
+	}
+	sort.Strings(out)
+	return out
+}
+
+func capabilityQueryDigest(query string, terms []string) string {
+	parts := append([]string{"jev-capability-query", query}, terms...)
+	digest := sha256.Sum256([]byte(strings.Join(parts, "|")))
+	return "sha256:" + hex.EncodeToString(digest[:])
+}
+
+func capabilityCatalogDigest() string {
+	entries := make([]string, 0, len(capabilityCatalog))
+	for _, entry := range capabilityCatalog {
+		aliases := append([]string(nil), entry.Aliases...)
+		sort.Strings(aliases)
+		entries = append(entries, strings.Join([]string{
+			entry.Key,
+			entry.Summary,
+			entry.ExampleQuery,
+			entry.NextOperation,
+			entry.Stage,
+			strings.Join(aliases, ","),
+			fmt.Sprint(entry.Safe),
+		}, "\x00"))
+	}
+	sort.Strings(entries)
+	digest := sha256.Sum256([]byte(strings.Join(entries, "\x00")))
+	return "sha256:" + hex.EncodeToString(digest[:])
+}
+
+func capabilityProvenanceDigest(sourceVersion, contractVersion, declarationSourceDigest string) string {
+	if strings.TrimSpace(sourceVersion) == "" || strings.TrimSpace(contractVersion) == "" {
+		return ""
+	}
+	parts := []string{
+		"jev-capability-provenance",
+		sourceVersion,
+		contractVersion,
+		capabilityCatalogDigest(),
+		declarationSourceDigest,
+	}
+	digest := sha256.Sum256([]byte(strings.Join(parts, "|")))
+	return "sha256:" + hex.EncodeToString(digest[:])
 }
 
 func matchForEntry(entry capabilityCatalogEntry) CapabilityDiscoveryMatch {
@@ -295,6 +388,19 @@ func (observation CapabilityDiscoveryObservation) Validate() error {
 	if strings.TrimSpace(observation.SourceVersion) == "" || strings.TrimSpace(observation.ContractVersion) == "" {
 		return fmt.Errorf("capability discovery identity is missing")
 	}
+	if !sort.StringsAreSorted(observation.NormalizedTerms) || len(sortedUniqueStrings(observation.NormalizedTerms)) != len(observation.NormalizedTerms) {
+		return fmt.Errorf("capability discovery normalized terms are not sorted and unique")
+	}
+	if !sort.StringsAreSorted(observation.MatchedTerms) || len(sortedUniqueStrings(observation.MatchedTerms)) != len(observation.MatchedTerms) {
+		return fmt.Errorf("capability discovery matched terms are not sorted and unique")
+	}
+	if observation.QueryDigest != capabilityQueryDigest(observation.Query, observation.NormalizedTerms) {
+		return fmt.Errorf("capability discovery query digest mismatch")
+	}
+	expectedProvenanceDigest := capabilityProvenanceDigest(observation.SourceVersion, observation.ContractVersion, observation.DeclarationSourceDigest)
+	if observation.ProvenanceDigest != expectedProvenanceDigest {
+		return fmt.Errorf("capability discovery provenance digest mismatch")
+	}
 	if !observation.IsReadOnly || observation.CanExecute || observation.CanAuthorize {
 		return fmt.Errorf("capability discovery crossed an execution or authorization boundary")
 	}
@@ -327,6 +433,8 @@ func (observation CapabilityDiscoveryObservation) Validate() error {
 func capabilityDiscoveryDigest(observation CapabilityDiscoveryObservation) string {
 	parts := []string{
 		"jev-capability-discovery",
+		observation.QueryDigest,
+		observation.ProvenanceDigest,
 		observation.SourceVersion,
 		observation.ContractVersion,
 		strings.ToLower(strings.TrimSpace(observation.Query)),
@@ -340,6 +448,8 @@ func capabilityDiscoveryDigest(observation CapabilityDiscoveryObservation) strin
 		parts = append(parts, match.Key, match.Summary, match.ExampleQuery, match.NextOperation, match.Stage, string(match.Status))
 	}
 	parts = append(parts, observation.Suggestions...)
+	parts = append(parts, observation.NormalizedTerms...)
+	parts = append(parts, observation.MatchedTerms...)
 	parts = append(parts, observation.SuggestedQueries...)
 	if observation.DeclarationBound {
 		parts = append(parts, "declaration", observation.DeclarationSourceDigest)

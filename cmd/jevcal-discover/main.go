@@ -30,6 +30,10 @@ type discoveryJSON struct {
 	SourceVersion              string      `json:"source_version"`
 	ContractVersion            string      `json:"contract_version"`
 	Query                      string      `json:"query"`
+	NormalizedTerms              []string    `json:"normalized_terms"`
+	MatchedTerms                 []string    `json:"matched_terms"`
+	QueryDigest                  string      `json:"query_digest"`
+	ProvenanceDigest             string      `json:"provenance_digest"`
 	Matches                    []matchJSON `json:"matches"`
 	Suggestions                []string    `json:"suggestions"`
 	SuggestedQueries           []string    `json:"suggested_queries"`
@@ -63,6 +67,10 @@ func render(observation jevcal.CapabilityDiscoveryObservation) discoveryJSON {
 		SourceVersion:              observation.SourceVersion,
 		ContractVersion:            observation.ContractVersion,
 		Query:                      observation.Query,
+		NormalizedTerms: observation.NormalizedTerms,
+		MatchedTerms: observation.MatchedTerms,
+		QueryDigest: observation.QueryDigest,
+		ProvenanceDigest: observation.ProvenanceDigest,
 		Matches:                    matches,
 		Suggestions:                observation.Suggestions,
 		SuggestedQueries:           observation.SuggestedQueries,

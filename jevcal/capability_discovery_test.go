@@ -22,6 +22,20 @@ func TestDiscoverCapabilitiesOverviewIsBoundAndReadOnly(t *testing.T) {
 	}
 }
 
+func TestDiscoverCapabilitiesReturnsNaturalQueryEvidence(t *testing.T) {
+	observation := DiscoverCapabilities(CapabilityDiscoveryInput{
+		SourceVersion: "gooo-source-v1",
+		ContractVersion: "jev-capability-discovery-v1",
+		Query: "What can gooo do with provenance?",
+	})
+	if len(observation.NormalizedTerms) == 0 || len(observation.MatchedTerms) == 0 || observation.QueryDigest == "" || observation.ProvenanceDigest == "" {
+		t.Fatalf("natural query evidence is incomplete: %+v", observation)
+	}
+	if err := observation.Validate(); err != nil {
+		t.Fatalf("natural query evidence should validate: %v", err)
+	}
+}
+
 func TestDiscoverCapabilitiesPreservesDeferredBoundary(t *testing.T) {
 	observation := DiscoverCapabilities(CapabilityDiscoveryInput{
 		SourceVersion: "gooo-source-v1",
