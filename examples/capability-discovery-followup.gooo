@@ -1,0 +1,22 @@
+module capability_discovery_followup_example
+
+input capability_discovery_observation
+input declaration_identity
+input selected_capability
+input external_boundary
+
+status BOUND ask which declared capability or operation to inspect
+status DEFERRED ask for an explicit external execution or authorization boundary
+status UNKNOWN ask for the missing source, contract, query, declaration, or catalog term
+
+field status
+field questions
+field first_boundary
+field is_read_only
+
+constraint deterministic_questions
+constraint preserve_first_boundary
+constraint no_execution
+constraint no_authorization
+constraint no_mutation
+constraint no_permission_grant
