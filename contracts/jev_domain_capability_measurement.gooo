@@ -1,0 +1,40 @@
+module jev_domain_capability_measurement
+
+input domain
+input expected_capabilities
+input observed_capabilities
+input missing_capabilities
+input coverage_ratio
+input useful_ratio
+input unresolved_ratio
+input observation_count
+input decision_signal
+input measurement_semantics
+input evidence_digests
+
+status COLLECT_MORE_OBSERVATIONS unresolved observations remain
+status REVIEW_MISSING_CAPABILITIES expected domain capabilities are not all observed
+status REVIEW_INVESTMENT observed usefulness supports bounded investment review
+status NO_ACTIONABLE_SIGNAL no actionable investment signal is present
+
+field domain
+field expected_capabilities
+field observed_capabilities
+field missing_capabilities
+field coverage_ratio
+field useful_ratio
+field unresolved_ratio
+field observation_count
+field decision_signal
+field measurement_semantics
+field evidence_digests
+
+constraint observation_only
+constraint no_execution
+constraint no_authorization
+constraint no_semantic_completion_claim
+constraint ratios_are_bounded_measurement_signals
+constraint expected_capabilities_are_domain_contract
+constraint missing_capabilities_are_explicit
+constraint evidence_digests_are_bound
+constraint decision_signal_is_review_only
