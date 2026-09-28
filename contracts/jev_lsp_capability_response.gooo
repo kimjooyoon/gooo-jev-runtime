@@ -1,0 +1,21 @@
+module jev_lsp_capability_response
+input LSPCapabilityResponse
+field query_digest string
+field status string
+field candidate_capability_ids []string
+field unresolved_terms []string
+field next_question string
+field provenance_digest string
+field contract_digest string
+status BOUND capability result can be shown without execution
+status DEFERRED multiple declared candidates remain
+status NEEDS_INPUT clarification is required
+status UNKNOWN evidence or catalog binding is incomplete
+constraint read_only_editor_response
+constraint no_execution
+constraint no_authorization
+constraint no_mutation
+constraint candidates_must_be_declared
+constraint unresolved_terms_must_be_visible
+constraint next_question_must_be_read_only
+constraint query_and_provenance_digests_required
