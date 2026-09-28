@@ -1,0 +1,12 @@
+{
+  "domain_id": "gooo.provenance",
+  "source_capability_ids": ["gooo.declaration.diff"],
+  "missing_capability_ids": ["gooo.provenance.compare"],
+  "observed_signals": ["REVIEW_MISSING_CAPABILITIES"],
+  "proposal": "Add a read-only provenance comparison example before considering implementation work.",
+  "next_question": "Which declaration pair should the example compare?",
+  "evidence_digests": ["sha256:observation-placeholder"],
+  "source_digest": "sha256:catalog-placeholder",
+  "contract_digest": "sha256:contract-placeholder",
+  "status": "PROPOSED"
+}
