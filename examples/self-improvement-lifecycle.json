@@ -1,0 +1,11 @@
+{
+  "from_stage": "MEASURED",
+  "to_stage": "PROPOSED",
+  "proposal_digest": "sha256:proposal",
+  "review_digest": "",
+  "application_digest": "",
+  "reversal_digest": "",
+  "provenance_digest": "sha256:measurement-provenance",
+  "meaning": "A bounded proposal is recorded for review; no source change or execution occurs.",
+  "next_transition_requires": "sha256:explicit-review"
+}
