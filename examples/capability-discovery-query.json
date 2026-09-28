@@ -1,0 +1,10 @@
+{
+  "query_text": "어떤 기능으로 선언된 데이터의 변경 이력을 안전하게 비교할 수 있나요?",
+  "normalized_terms": ["declared_data", "change_history", "safe_compare"],
+  "candidate_capability_ids": ["gooo.declaration.diff", "gooo.provenance.compare"],
+  "unresolved_terms": [],
+  "next_question": "비교 대상 선언의 식별자를 선택하시겠습니까?",
+  "query_digest": "sha256:query-example-placeholder",
+  "provenance_digest": "sha256:contract-and-catalog-placeholder",
+  "status": "BOUND"
+}
