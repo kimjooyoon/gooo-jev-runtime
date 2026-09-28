@@ -1,0 +1,29 @@
+module jev_lsp_capability_discovery_followup
+
+input capability_discovery_observation
+input query_digest
+input provenance_digest
+ainput declaration_source_digest
+input discovery_digest
+
+status BOUND read-only capability selection questions are available
+status DEFERRED an explicit external boundary remains
+status UNKNOWN the earliest discovery boundary remains unresolved
+
+field status
+field questions
+field first_boundary
+field is_read_only
+field query_digest
+field provenance_digest
+field declaration_source_digest
+field discovery_digest
+
+constraint lsp_projection_only
+constraint preserve_query_evidence
+constraint preserve_provenance_evidence
+constraint preserve_declaration_evidence
+constraint preserve_first_boundary
+constraint no_execution
+constraint no_authorization
+constraint no_mutation
