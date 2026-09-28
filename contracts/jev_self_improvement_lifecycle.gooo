@@ -1,0 +1,24 @@
+module jev_self_improvement_lifecycle
+input SelfImprovementLifecycle
+field from_stage string
+field to_stage string
+field proposal_digest string
+field review_digest string
+field application_digest string
+field reversal_digest string
+field provenance_digest string
+status OBSERVED observation is recorded with provenance
+status MEASURED domain measurement is recorded with provenance
+status PROPOSED bounded improvement proposal is recorded
+status REVIEWED explicit review evidence is recorded
+status APPLIED explicit application evidence is recorded
+status REVERSED explicit reversal evidence is recorded
+status UNKNOWN required evidence is missing or ambiguous
+constraint no_automatic_apply
+constraint unknown_cannot_advance_automatically
+constraint proposed_requires_proposal_digest
+constraint reviewed_requires_proposal_and_review_digest
+constraint applied_requires_proposal_review_and_application_digest
+constraint reversed_requires_application_and_reversal_digest
+constraint every_transition_requires_provenance_digest
+constraint transition_is_observation_only
